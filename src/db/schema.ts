@@ -79,9 +79,30 @@ export const savedStations = sqliteTable(
   ],
 );
 
+export const purchases = sqliteTable(
+  "purchases",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    stripePaymentId: text("stripe_payment_id").notNull(),
+    amount: integer("amount").notNull(), // in pence
+    status: text("status").notNull().default("completed"),
+    createdAt: text("created_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+  },
+  (table) => [
+    uniqueIndex("purchases_stripe_payment_idx").on(table.stripePaymentId),
+    index("purchases_user_idx").on(table.userId),
+  ],
+);
+
 export type Station = typeof stations.$inferSelect;
 export type NewStation = typeof stations.$inferInsert;
 export type Price = typeof prices.$inferSelect;
 export type NewPrice = typeof prices.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type SavedStation = typeof savedStations.$inferSelect;
+export type Purchase = typeof purchases.$inferSelect;
