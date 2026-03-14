@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+
+const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export const metadata: Metadata = {
   title: {
@@ -41,11 +44,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
+  const inner = (
     <html lang="en">
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
       </body>
     </html>
   );
+
+  return clerkEnabled ? <ClerkProvider>{inner}</ClerkProvider> : inner;
 }

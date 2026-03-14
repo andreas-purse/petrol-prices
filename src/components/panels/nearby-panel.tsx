@@ -3,6 +3,7 @@
 import { SearchBar } from "@/components/search/search-bar";
 import { SearchResults } from "@/components/search/search-results";
 import { FuelTypeFilter } from "@/components/filters/fuel-type-filter";
+import { AuthButtons } from "@/components/auth/auth-buttons";
 import type { FuelType } from "@/hooks/use-fuel-filter";
 import type { NearbyStation } from "@/hooks/use-nearby";
 
@@ -32,11 +33,14 @@ export function NearbyPanel({
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white">
       <div className="border-b border-border p-4">
-        <div className="mb-3">
-          <h1 className="text-lg font-bold">Find My Fuel</h1>
-          <p className="text-xs text-muted-foreground">
-            Save time and money. Find cheap fuel close by.
-          </p>
+        <div className="mb-3 flex items-start justify-between">
+          <div>
+            <h1 className="text-lg font-bold">Find My Fuel</h1>
+            <p className="text-xs text-muted-foreground">
+              Save time and money. Find cheap fuel close by.
+            </p>
+          </div>
+          <AuthButtons />
         </div>
         <SearchBar
           onSearch={onSearch}

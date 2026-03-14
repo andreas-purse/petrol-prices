@@ -1,9 +1,12 @@
 "use client";
 
+import { AuthButtons } from "@/components/auth/auth-buttons";
+
 export function Header() {
   return (
-    <header className="flex h-14 items-center border-b border-border bg-white px-4 shadow-sm md:hidden">
+    <header className="flex h-14 items-center justify-between border-b border-border bg-white px-4 shadow-sm md:hidden">
       <h1 className="text-lg font-bold text-foreground">Find My Fuel</h1>
+      <AuthButtons />
     </header>
   );
 }
