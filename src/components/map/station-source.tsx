@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Source, Layer } from "react-map-gl/maplibre";
 import type { LayerProps, MapLayerMouseEvent } from "react-map-gl/maplibre";
 import type { StationGeoJSON, StationFeature } from "@/hooks/use-stations";
@@ -25,25 +25,15 @@ const clusterLayer: LayerProps = {
     "circle-color": [
       "step",
       ["get", "point_count"],
-      "#60a5fa", // blue < 50
+      "#60a5fa",
       50,
-      "#3b82f6", // blue < 200
+      "#3b82f6",
       200,
-      "#2563eb", // blue < 500
+      "#2563eb",
       500,
-      "#1d4ed8", // dark blue
+      "#1d4ed8",
     ],
-    "circle-radius": [
-      "step",
-      ["get", "point_count"],
-      18, // radius for < 50
-      50,
-      24,
-      200,
-      30,
-      500,
-      36,
-    ],
+    "circle-radius": ["step", ["get", "point_count"], 18, 50, 24, 200, 30, 500, 36],
     "circle-stroke-width": 2,
     "circle-stroke-color": "#ffffff",
   },
@@ -56,7 +46,6 @@ const clusterCountLayer: LayerProps = {
   filter: ["has", "point_count"],
   layout: {
     "text-field": "{point_count_abbreviated}",
-    "text-font": ["Open Sans Bold"],
     "text-size": 13,
   },
   paint: {
@@ -98,13 +87,18 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     })),
   };
 
-  const dynamicPointLayer = {
-    ...unclusteredPointLayer,
+  const dynamicPointLayer: LayerProps = {
+    id: "unclustered-point",
+    type: "circle",
+    source: "stations",
+    filter: ["!", ["has", "point_count"]],
     paint: {
-      ...unclusteredPointLayer.paint,
+      "circle-radius": 7,
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#ffffff",
       "circle-color": ["get", "_color"],
     },
-  } as LayerProps;
+  };
 
   const onClick = useCallback(
     (event: MapLayerMouseEvent) => {
@@ -112,7 +106,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
 
       const feature = event.features[0]!;
 
-      // If cluster, zoom in
       if (feature.properties?.cluster) {
         const clusterId = feature.properties.cluster_id;
         const source = map.getSource("stations");
@@ -130,7 +123,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
         return;
       }
 
-      // Individual station clicked
       const props = feature.properties;
       if (props) {
         const stationFeature: StationFeature = {
@@ -151,12 +143,18 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     [map, onStationClick],
   );
 
-  // Register click handlers
-  if (map) {
+  // Register click handlers properly with cleanup
+  useEffect(() => {
+    if (!map) return;
+
     map.on("click", "clusters", onClick);
     map.on("click", "unclustered-point", onClick);
-    map.getCanvas().style.cursor = "pointer";
-  }
+
+    return () => {
+      map.off("click", "clusters", onClick);
+      map.off("click", "unclustered-point", onClick);
+    };
+  }, [map, onClick]);
 
   return (
     <Source

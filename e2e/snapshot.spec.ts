@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 // This file takes screenshots of key UI states.
 // Run with: pnpm snapshot
@@ -7,31 +7,44 @@ import { test, expect } from "@playwright/test";
 test.describe("Visual snapshots", () => {
   test("homepage loads with map and sidebar", async ({ page }) => {
     await page.goto("/");
-    // Wait for the map container to be visible
-    await page.waitForSelector(".maplibregl-map, [data-testid='map-loading']", {
-      timeout: 15_000,
-    }).catch(() => {
-      // Map may not load without tiles in CI, that's fine
+    // Wait for the map to fully render
+    await page
+      .waitForSelector(".maplibregl-canvas", { timeout: 15_000 })
+      .catch(() => {});
+    // Wait for station data to load (Loading stations... disappears)
+    await page
+      .waitForFunction(() => !document.body.textContent?.includes("Loading stations"), {
+        timeout: 30_000,
+      })
+      .catch(() => {});
+    await page.waitForTimeout(3000);
+    await page.screenshot({
+      path: `snapshots/${test.info().project.name}-homepage.png`,
+      fullPage: false,
     });
-    // Small wait for UI to settle
-    await page.waitForTimeout(2000);
-    await page.screenshot({ path: `snapshots/${test.info().project.name}-homepage.png`, fullPage: false });
   });
 
   test("search bar is visible and interactive", async ({ page }) => {
     await page.goto("/");
-    const searchInput = page.getByPlaceholder("Enter postcode");
-    await expect(searchInput).toBeVisible();
+    await page.waitForTimeout(1000);
+    // Use first visible search input (desktop sidebar or mobile sheet)
+    const searchInput = page.getByRole("textbox", { name: "Search by postcode" }).first();
     await searchInput.fill("SW1A 1AA");
-    await page.screenshot({ path: `snapshots/${test.info().project.name}-search-filled.png`, fullPage: false });
+    await page.screenshot({
+      path: `snapshots/${test.info().project.name}-search-filled.png`,
+      fullPage: false,
+    });
   });
 
   test("fuel filter buttons work", async ({ page }) => {
     await page.goto("/");
-    // Click Diesel filter
-    const dieselBtn = page.getByRole("radio", { name: "Diesel" });
-    await expect(dieselBtn).toBeVisible();
+    await page.waitForTimeout(1000);
+    // Use first visible Diesel button
+    const dieselBtn = page.getByRole("radio", { name: "Diesel", exact: true }).first();
     await dieselBtn.click();
-    await page.screenshot({ path: `snapshots/${test.info().project.name}-diesel-selected.png`, fullPage: false });
+    await page.screenshot({
+      path: `snapshots/${test.info().project.name}-diesel-selected.png`,
+      fullPage: false,
+    });
   });
 });

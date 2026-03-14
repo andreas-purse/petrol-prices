@@ -29,7 +29,10 @@
       "Bash(sleep:*)",
       "Bash(git status:*)",
       "Bash(gh repo:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)"
     ]
   }
 }

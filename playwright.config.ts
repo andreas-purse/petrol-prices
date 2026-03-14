@@ -13,11 +13,11 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 720 } },
     },
     {
       name: "mobile",
-      use: { ...devices["iPhone 14"] },
+      use: { ...devices["Pixel 5"], viewport: { width: 390, height: 844 } },
     },
   ],
   webServer: {
