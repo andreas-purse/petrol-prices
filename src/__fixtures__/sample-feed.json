@@ -1,0 +1,45 @@
+{
+  "last_updated": "2026-03-14T10:00:00Z",
+  "stations": [
+    {
+      "site_id": "asda-001",
+      "brand": "Asda",
+      "address": "123 High Street, London",
+      "postcode": "SW1A 1AA",
+      "location": { "latitude": 51.5007, "longitude": -0.1246 },
+      "prices": { "E10": 138.9, "E5": 145.9, "B7": 157.9, "SDV": 162.9 }
+    },
+    {
+      "site_id": "bp-002",
+      "brand": "BP",
+      "address": "456 Station Road, Manchester",
+      "postcode": "M1 1AA",
+      "location": { "latitude": "53.4808", "longitude": "-2.2426" },
+      "prices": { "E10": "141.5", "E5": "148.9", "B7": "159.9" }
+    },
+    {
+      "site_id": "shell-003",
+      "brand": "SHELL",
+      "address": "789 Park Lane, Edinburgh",
+      "postcode": "EH1 1AA",
+      "location": { "latitude": 55.9533, "longitude": -3.1883 },
+      "prices": { "E10": 140.2, "E5": null, "B7": 158.5, "SDV": 163.2 }
+    },
+    {
+      "site_id": "invalid-lat",
+      "brand": "Test",
+      "address": "Invalid",
+      "postcode": "XX1 1XX",
+      "location": { "latitude": 10.0, "longitude": -1.0 },
+      "prices": { "E10": 140.0 }
+    },
+    {
+      "site_id": "no-prices",
+      "brand": "Test",
+      "address": "No Prices",
+      "postcode": "XX2 2XX",
+      "location": { "latitude": 52.0, "longitude": -1.0 },
+      "prices": {}
+    }
+  ]
+}

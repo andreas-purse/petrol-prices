@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.gov.uk)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.developer.fuel-finder.service.gov.uk)",
+      "WebFetch(domain:storelocator.asda.com)",
+      "WebFetch(domain:www.bp.com)",
+      "WebFetch(domain:www.shell.co.uk)",
+      "WebFetch(domain:prodpricinghubstrgacct.blob.core.windows.net)",
+      "WebFetch(domain:morrisons.com)",
+      "Bash(ls:*)",
+      "Bash(which pnpm:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm create:*)",
+      "Bash(pnpm init:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(npx:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm:*)",
+      "Bash(source:*)",
+      "Bash(sleep:*)",
+      "Bash(git status:*)",
+      "Bash(gh repo:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

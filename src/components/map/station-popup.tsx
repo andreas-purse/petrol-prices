@@ -1,0 +1,52 @@
+"use client";
+
+import { Popup } from "react-map-gl/maplibre";
+import type { StationFeature } from "@/hooks/use-stations";
+import { FUEL_LABELS, type FuelType } from "@/hooks/use-fuel-filter";
+
+interface StationPopupProps {
+  station: StationFeature;
+  onClose: () => void;
+}
+
+function formatPrice(pence: number): string {
+  return `${pence.toFixed(1)}p`;
+}
+
+export function StationPopup({ station, onClose }: StationPopupProps) {
+  const { properties, geometry } = station;
+
+  return (
+    <Popup
+      longitude={geometry.coordinates[0]}
+      latitude={geometry.coordinates[1]}
+      anchor="bottom"
+      onClose={onClose}
+      closeOnClick={false}
+      className="station-popup"
+    >
+      <div className="min-w-[200px] p-1">
+        <h3 className="text-sm font-bold text-foreground">{properties.brand}</h3>
+        <p className="text-xs text-muted-foreground">{properties.address}</p>
+        {properties.postcode && (
+          <p className="text-xs text-muted-foreground">{properties.postcode}</p>
+        )}
+        <div className="mt-2 space-y-1">
+          {(Object.entries(properties.prices) as [FuelType, number][]).map(
+            ([fuel, price]) => (
+              <div key={fuel} className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {FUEL_LABELS[fuel] ?? fuel}
+                </span>
+                <span className="font-semibold">{formatPrice(price)}</span>
+              </div>
+            ),
+          )}
+          {Object.keys(properties.prices).length === 0 && (
+            <p className="text-xs text-muted-foreground">No price data available</p>
+          )}
+        </div>
+      </div>
+    </Popup>
+  );
+}
