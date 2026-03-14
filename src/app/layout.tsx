@@ -2,13 +2,37 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Petrol Prices UK - Find Cheap Fuel Near You",
+  title: {
+    default: "Find My Fuel — Save Time & Money on Petrol",
+    template: "%s | Find My Fuel",
+  },
   description:
-    "Compare live petrol and diesel prices at thousands of UK fuel stations. Find the cheapest fuel near you with our interactive map.",
+    "Save time and money. Find cheap fuel close by. Compare live petrol and diesel prices at 7,000+ UK stations with official CMA data updated every 30 minutes.",
+  keywords: [
+    "petrol prices",
+    "fuel prices UK",
+    "cheap petrol",
+    "diesel prices",
+    "fuel station map",
+    "find cheap fuel",
+    "petrol station near me",
+  ],
   openGraph: {
-    title: "Petrol Prices UK",
-    description: "Compare live fuel prices at thousands of UK stations",
+    title: "Find My Fuel — Save Time & Money on Petrol",
+    description:
+      "Save time and money. Find cheap fuel close by. Compare live prices at 7,000+ UK fuel stations.",
     type: "website",
+    siteName: "Find My Fuel",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Find My Fuel — Save Time & Money on Petrol",
+    description:
+      "Save time and money. Find cheap fuel close by. Compare live prices at 7,000+ UK fuel stations.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

@@ -32,7 +32,7 @@ export function NearbyPanel({
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white">
       <div className="border-b border-border p-4">
-        <h1 className="mb-3 text-lg font-bold">Petrol Prices UK</h1>
+        <h1 className="mb-3 text-lg font-bold">Find My Fuel</h1>
         <SearchBar
           onSearch={onSearch}
           onLocate={onLocate}

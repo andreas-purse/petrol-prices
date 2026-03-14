@@ -53,19 +53,6 @@ const clusterCountLayer: LayerProps = {
   },
 };
 
-const unclusteredPointLayer: LayerProps = {
-  id: "unclustered-point",
-  type: "circle",
-  source: "stations",
-  filter: ["!", ["has", "point_count"]],
-  paint: {
-    "circle-radius": 7,
-    "circle-stroke-width": 2,
-    "circle-stroke-color": "#ffffff",
-    "circle-color": "#3b82f6",
-  },
-};
-
 interface StationSourceProps {
   geojson: StationGeoJSON;
   fuel: FuelType;
