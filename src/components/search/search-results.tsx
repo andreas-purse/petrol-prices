@@ -2,6 +2,7 @@
 
 import type { NearbyStation } from "@/hooks/use-nearby";
 import { FUEL_LABELS, type FuelType } from "@/hooks/use-fuel-filter";
+import { FreshnessBadge } from "@/components/ui/freshness-badge";
 
 interface SearchResultsProps {
   stations: NearbyStation[];
@@ -51,6 +52,9 @@ export function SearchResults({ stations, fuel, isLoading }: SearchResultsProps)
               <p className="text-xs text-muted-foreground">
                 {station.postcode} &middot; {formatDistance(station.distance)}
               </p>
+              {station.updatedAt && (
+                <FreshnessBadge updatedAt={station.updatedAt} />
+              )}
             </div>
             {station.prices[fuel] !== undefined && (
               <div className="ml-2 text-right">

@@ -17,6 +17,7 @@ export interface StationFeature {
     address: string;
     postcode: string;
     prices: Record<string, number>;
+    updatedAt: string;
   };
 }
 

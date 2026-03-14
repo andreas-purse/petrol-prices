@@ -12,6 +12,7 @@ export interface NearbyStation {
   postcode: string;
   latitude: number;
   longitude: number;
+  updatedAt: string;
   distance: number;
   prices: Record<string, number>;
 }

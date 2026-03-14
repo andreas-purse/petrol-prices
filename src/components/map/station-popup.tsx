@@ -3,6 +3,7 @@
 import { Popup } from "react-map-gl/maplibre";
 import type { StationFeature } from "@/hooks/use-stations";
 import { FUEL_LABELS, type FuelType } from "@/hooks/use-fuel-filter";
+import { FreshnessBadge, CmaBadge } from "@/components/ui/freshness-badge";
 
 interface StationPopupProps {
   station: StationFeature;
@@ -31,6 +32,12 @@ export function StationPopup({ station, onClose }: StationPopupProps) {
         {properties.postcode && (
           <p className="text-xs text-muted-foreground">{properties.postcode}</p>
         )}
+        <div className="mt-1.5 flex items-center gap-2">
+          <CmaBadge />
+          {properties.updatedAt && (
+            <FreshnessBadge updatedAt={properties.updatedAt} />
+          )}
+        </div>
         <div className="mt-2 space-y-1">
           {(Object.entries(properties.prices) as [FuelType, number][]).map(
             ([fuel, price]) => (

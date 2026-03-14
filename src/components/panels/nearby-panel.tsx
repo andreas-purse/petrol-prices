@@ -32,7 +32,12 @@ export function NearbyPanel({
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white">
       <div className="border-b border-border p-4">
-        <h1 className="mb-3 text-lg font-bold">Find My Fuel</h1>
+        <div className="mb-3">
+          <h1 className="text-lg font-bold">Find My Fuel</h1>
+          <p className="text-xs text-muted-foreground">
+            Save time and money. Find cheap fuel close by.
+          </p>
+        </div>
         <SearchBar
           onSearch={onSearch}
           onLocate={onLocate}
@@ -55,6 +60,11 @@ export function NearbyPanel({
             Search by postcode or use your location to find nearby stations.
           </div>
         )}
+      </div>
+      <div className="border-t border-border p-3 text-center">
+        <a href="/about" className="text-xs text-muted-foreground hover:text-primary hover:underline">
+          About our data — CMA verified sources
+        </a>
       </div>
     </div>
   );

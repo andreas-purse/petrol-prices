@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
         postcode: stations.postcode,
         latitude: stations.latitude,
         longitude: stations.longitude,
+        updatedAt: stations.updatedAt,
         distance: sql<number>`(
           6371000 * 2 * asin(sqrt(
             pow(sin((radians(${stations.latitude}) - radians(${lat})) / 2), 2) +

@@ -45,6 +45,7 @@ export async function GET(_request: NextRequest) {
         address: s.address,
         postcode: s.postcode,
         prices: pricesByStation.get(s.id) ?? {},
+        updatedAt: s.updatedAt,
       },
     }));
 

@@ -122,6 +122,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
             address: props.address,
             postcode: props.postcode,
             prices: typeof props.prices === "string" ? JSON.parse(props.prices) : props.prices,
+            updatedAt: props.updatedAt,
           },
         };
         onStationClick(stationFeature);
