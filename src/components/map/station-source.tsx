@@ -7,13 +7,57 @@ import type { StationGeoJSON, StationFeature } from "@/hooks/use-stations";
 import type { FuelType } from "@/hooks/use-fuel-filter";
 import { useMap } from "react-map-gl/maplibre";
 
-function getPriceColor(price: number | undefined): string {
-  if (!price) return "#94a3b8"; // gray for no price
-  if (price < 135) return "#16a34a"; // green
-  if (price < 145) return "#65a30d"; // lime
-  if (price < 150) return "#eab308"; // yellow
-  if (price < 155) return "#f97316"; // orange
-  return "#dc2626"; // red
+const PRICE_COLORS = [
+  "#16a34a", // green  — cheapest 20%
+  "#65a30d", // lime   — 20-40%
+  "#eab308", // yellow — 40-60%
+  "#f97316", // orange — 60-80%
+  "#dc2626", // red    — most expensive 20%
+] as const;
+
+const NO_DATA_COLOR = "#94a3b8";
+
+export interface PriceThresholds {
+  p20: number;
+  p40: number;
+  p60: number;
+  p80: number;
+}
+
+export function computeThresholds(
+  features: StationFeature[],
+  fuel: FuelType
+): PriceThresholds {
+  const prices = features
+    .map((f) => f.properties.prices[fuel])
+    .filter((p): p is number => typeof p === "number" && p > 0)
+    .sort((a, b) => a - b);
+
+  if (prices.length === 0) {
+    return { p20: 130, p40: 135, p60: 140, p80: 145 };
+  }
+
+  const percentile = (pct: number) =>
+    prices[Math.floor((pct / 100) * (prices.length - 1))]!;
+
+  return {
+    p20: percentile(20),
+    p40: percentile(40),
+    p60: percentile(60),
+    p80: percentile(80),
+  };
+}
+
+function getPriceColor(
+  price: number | undefined,
+  thresholds: PriceThresholds
+): string {
+  if (!price) return NO_DATA_COLOR;
+  if (price <= thresholds.p20) return PRICE_COLORS[0];
+  if (price <= thresholds.p40) return PRICE_COLORS[1];
+  if (price <= thresholds.p60) return PRICE_COLORS[2];
+  if (price <= thresholds.p80) return PRICE_COLORS[3];
+  return PRICE_COLORS[4];
 }
 
 const clusterLayer: LayerProps = {
@@ -62,6 +106,8 @@ interface StationSourceProps {
 export function StationSource({ geojson, fuel, onStationClick }: StationSourceProps) {
   const { current: map } = useMap();
 
+  const thresholds = computeThresholds(geojson.features, fuel);
+
   // Color unclustered points by price
   const coloredGeojson = {
     ...geojson,
@@ -69,7 +115,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       ...f,
       properties: {
         ...f.properties,
-        _color: getPriceColor(f.properties.prices[fuel]),
+        _color: getPriceColor(f.properties.prices[fuel], thresholds),
       },
     })),
   };
