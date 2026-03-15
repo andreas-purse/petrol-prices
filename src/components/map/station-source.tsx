@@ -71,7 +71,22 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
 
   const thresholds = computeThresholds(geojson.features, fuel);
 
-  // Color unclustered points by price, add _price for cluster aggregation
+  // Compute min/max prices for heatmap weight normalization
+  const priceRange = useMemo(() => {
+    const prices = geojson.features
+      .map((f) => f.properties.prices[fuel])
+      .filter((p): p is number => typeof p === "number" && p > 0);
+    if (prices.length === 0) return { min: 120, max: 160 };
+    let min = Infinity;
+    let max = -Infinity;
+    for (const p of prices) {
+      if (p < min) min = p;
+      if (p > max) max = p;
+    }
+    return { min, max };
+  }, [geojson, fuel]);
+
+  // Add _color and _price properties for each feature
   const coloredGeojson = useMemo(
     () => ({
       ...geojson,
@@ -83,7 +98,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
             ...f.properties,
             _color: getPriceColor(price, thresholds),
             _price: typeof price === "number" && price > 0 ? price : 0,
-            _hasPrice: typeof price === "number" && price > 0 ? 1 : 0,
           },
         };
       }),
@@ -91,47 +105,100 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     [geojson, fuel, thresholds]
   );
 
-  // Build cluster color expression using dynamic thresholds
-  const clusterColorExpr: maplibregl.ExpressionSpecification = [
-    "case",
-    // If no stations in cluster have prices, show gray
-    ["==", ["get", "priceCount"], 0],
-    NO_DATA_COLOR,
-    // Otherwise color by average price using thresholds
-    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p20],
-    PRICE_COLORS[0],
-    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p40],
-    PRICE_COLORS[1],
-    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p60],
-    PRICE_COLORS[2],
-    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p80],
-    PRICE_COLORS[3],
-    PRICE_COLORS[4],
-  ];
-
-  const clusterLayer: LayerProps = {
-    id: "clusters",
-    type: "circle",
+  // Heatmap layer — visible at low zoom, fades out as you zoom in
+  const heatmapLayer: LayerProps = {
+    id: "station-heat",
+    type: "heatmap",
     source: "stations",
-    filter: ["has", "point_count"],
     paint: {
-      "circle-color": clusterColorExpr,
-      "circle-radius": ["step", ["get", "point_count"], 18, 50, 24, 200, 30, 500, 36],
-      "circle-stroke-width": 2,
-      "circle-stroke-color": "rgba(255,255,255,0.3)",
+      // Weight by price — higher price = more "heat"
+      "heatmap-weight": [
+        "interpolate",
+        ["linear"],
+        ["get", "_price"],
+        0, 0,
+        priceRange.min, 0.15,
+        priceRange.max, 1,
+      ] as maplibregl.ExpressionSpecification,
+      // Increase intensity with zoom
+      "heatmap-intensity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 0.6,
+        6, 1,
+        10, 1.5,
+      ] as maplibregl.ExpressionSpecification,
+      // Color ramp: transparent → deep blue → cyan → green → gold → orange → hot pink
+      "heatmap-color": [
+        "interpolate",
+        ["linear"],
+        ["heatmap-density"],
+        0, "rgba(0,0,0,0)",
+        0.1, "#0044FF",
+        0.25, "#00D4FF",
+        0.4, "#00FF88",
+        0.6, "#FFD600",
+        0.8, "#FF8C00",
+        1, "#FF3355",
+      ] as maplibregl.ExpressionSpecification,
+      // Radius increases with zoom for smooth appearance
+      "heatmap-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 4,
+        5, 12,
+        8, 20,
+        11, 30,
+        13, 40,
+      ] as maplibregl.ExpressionSpecification,
+      // Fade out heatmap at high zoom
+      "heatmap-opacity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        10, 0.8,
+        12, 0.3,
+        14, 0,
+      ] as maplibregl.ExpressionSpecification,
     },
   };
 
-  const dynamicPointLayer: LayerProps = {
+  // Individual station points — fade in at high zoom
+  const pointLayer: LayerProps = {
     id: "unclustered-point",
     type: "circle",
     source: "stations",
-    filter: ["!", ["has", "point_count"]],
     paint: {
-      "circle-radius": 7,
+      "circle-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        10, 3,
+        13, 7,
+        16, 10,
+      ],
       "circle-stroke-width": 2,
       "circle-stroke-color": "rgba(255,255,255,0.3)",
       "circle-color": ["get", "_color"],
+      // Fade in as heatmap fades out
+      "circle-opacity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        10, 0,
+        12, 0.7,
+        14, 1,
+      ],
+      "circle-stroke-opacity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        10, 0,
+        12, 0.7,
+        14, 1,
+      ],
     },
   };
 
@@ -140,24 +207,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       if (!map || !event.features?.length) return;
 
       const feature = event.features[0]!;
-
-      if (feature.properties?.cluster) {
-        const clusterId = feature.properties.cluster_id;
-        const source = map.getSource("stations");
-        if (source && "getClusterExpansionZoom" in source) {
-          (source as { getClusterExpansionZoom: (id: number) => Promise<number> })
-            .getClusterExpansionZoom(clusterId)
-            .then((zoom) => {
-              const coords = (feature.geometry as GeoJSON.Point).coordinates;
-              map.easeTo({
-                center: [coords[0]!, coords[1]!],
-                zoom,
-              });
-            });
-        }
-        return;
-      }
-
       const props = feature.properties;
       if (props) {
         const stationFeature: StationFeature = {
@@ -179,16 +228,21 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     [map, onStationClick],
   );
 
-  // Register click handlers properly with cleanup
+  // Register click + cursor handlers for points
   useEffect(() => {
     if (!map) return;
 
-    map.on("click", "clusters", onClick);
+    const onEnter = () => { map.getCanvas().style.cursor = "pointer"; };
+    const onLeave = () => { map.getCanvas().style.cursor = ""; };
+
     map.on("click", "unclustered-point", onClick);
+    map.on("mouseenter", "unclustered-point", onEnter);
+    map.on("mouseleave", "unclustered-point", onLeave);
 
     return () => {
-      map.off("click", "clusters", onClick);
       map.off("click", "unclustered-point", onClick);
+      map.off("mouseenter", "unclustered-point", onEnter);
+      map.off("mouseleave", "unclustered-point", onLeave);
     };
   }, [map, onClick]);
 
@@ -197,16 +251,9 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       id="stations"
       type="geojson"
       data={coloredGeojson}
-      cluster
-      clusterMaxZoom={14}
-      clusterRadius={50}
-      clusterProperties={{
-        priceSum: ["+", ["get", "_price"]],
-        priceCount: ["+", ["get", "_hasPrice"]],
-      }}
     >
-      <Layer {...clusterLayer} />
-      <Layer {...dynamicPointLayer} />
+      <Layer {...heatmapLayer} />
+      <Layer {...pointLayer} />
     </Source>
   );
 }
