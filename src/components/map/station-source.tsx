@@ -8,14 +8,14 @@ import type { FuelType } from "@/hooks/use-fuel-filter";
 import { useMap } from "react-map-gl/maplibre";
 
 const PRICE_COLORS = [
-  "#16a34a", // green  — cheapest 20%
-  "#65a30d", // lime   — 20-40%
-  "#eab308", // yellow — 40-60%
-  "#f97316", // orange — 60-80%
-  "#dc2626", // red    — most expensive 20%
+  "#58D68D", // mint      — cheapest 20%
+  "#82E0AA", // seafoam   — 20-40%
+  "#F7DC6F", // yellow    — 40-60%
+  "#F5B041", // tangerine — 60-80%
+  "#E8453C", // red       — most expensive 20%
 ] as const;
 
-const NO_DATA_COLOR = "#94a3b8";
+const NO_DATA_COLOR = "#C4B5A8";
 
 export interface PriceThresholds {
   p20: number;

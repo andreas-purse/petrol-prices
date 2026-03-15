@@ -47,7 +47,7 @@ export function FreshnessBadge({ updatedAt }: FreshnessBadgeProps) {
 export function CmaBadge() {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+      className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2 py-0.5 text-xs font-medium text-secondary"
       title="Official data from CMA-mandated retailer feeds"
     >
       <svg

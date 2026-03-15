@@ -44,7 +44,7 @@ export function SearchResults({ stations, fuel, isLoading }: SearchResultsProps)
   return (
     <div className="divide-y divide-border">
       {stations.map((station) => (
-        <div key={station.id} className="p-3 transition-colors hover:bg-muted/50">
+        <div key={station.id} className="p-3 transition-colors hover:bg-muted">
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1">
               <h4 className="truncate text-sm font-semibold">{station.brand}</h4>

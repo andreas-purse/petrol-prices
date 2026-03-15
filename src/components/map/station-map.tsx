@@ -49,7 +49,7 @@ export function StationMap({ fuel, searchLat, searchLng }: StationMapProps) {
   return (
     <div className="relative h-full w-full">
       {isLoading && (
-        <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2 rounded-lg bg-white px-4 py-2 shadow-lg">
+        <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2 rounded-xl bg-card px-4 py-2 shadow-lg">
           <p className="text-sm text-muted-foreground">Loading stations...</p>
         </div>
       )}

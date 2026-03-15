@@ -29,15 +29,15 @@ export default function AboutPage() {
     <div className="mx-auto max-w-2xl px-4 py-12">
       <Link
         href="/"
-        className="mb-8 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+        className="mb-8 inline-flex items-center gap-1 text-sm text-secondary hover:underline"
       >
         &larr; Back to map
       </Link>
 
-      <h1 className="mb-6 text-3xl font-bold">About Our Data</h1>
+      <h1 className="mb-6 font-heading text-3xl font-bold">About Our Data</h1>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">Where does the data come from?</h2>
+        <h2 className="mb-3 font-heading text-xl font-semibold">Where does the data come from?</h2>
         <p className="mb-3 text-muted-foreground">
           Every price you see on Find My Fuel comes directly from{" "}
           <strong>official retailer feeds mandated by the UK government</strong>.
@@ -48,7 +48,7 @@ export default function AboutPage() {
             href="https://www.gov.uk/government/publications/road-fuel-market-study"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary underline"
+            className="text-secondary underline"
           >
             road fuel market study
           </a>{" "}
@@ -59,7 +59,7 @@ export default function AboutPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">Why you can trust it</h2>
+        <h2 className="mb-3 font-heading text-xl font-semibold">Why you can trust it</h2>
         <div className="space-y-3">
           <div className="flex gap-3 rounded-lg bg-muted/50 p-4">
             <span className="mt-0.5 text-lg text-cheap">&#10003;</span>
@@ -104,7 +104,7 @@ export default function AboutPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">Retailers we cover</h2>
+        <h2 className="mb-3 font-heading text-xl font-semibold">Retailers we cover</h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {RETAILERS.map((name) => (
             <div
@@ -118,7 +118,7 @@ export default function AboutPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-xl font-semibold">Freshness indicators</h2>
+        <h2 className="mb-3 font-heading text-xl font-semibold">Freshness indicators</h2>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="inline-block h-3 w-3 rounded-full bg-cheap" />
@@ -142,7 +142,7 @@ export default function AboutPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-xl font-semibold">Questions?</h2>
+        <h2 className="mb-3 font-heading text-xl font-semibold">Questions?</h2>
         <p className="text-muted-foreground">
           Find My Fuel is built to help UK drivers save money on fuel. If you spot
           incorrect data, it&apos;s likely because the retailer hasn&apos;t updated their

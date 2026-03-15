@@ -11,7 +11,7 @@ export function ClerkAuth() {
 
   return (
     <SignInButton mode="modal">
-      <button className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+      <button className="rounded-xl bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
         Sign in
       </button>
     </SignInButton>

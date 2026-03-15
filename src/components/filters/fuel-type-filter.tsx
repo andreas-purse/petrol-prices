@@ -18,9 +18,9 @@ export function FuelTypeFilter({ selected, onChange }: FuelTypeFilterProps) {
           role="radio"
           aria-checked={selected === fuel}
           onClick={() => onChange(fuel)}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+          className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${
             selected === fuel
-              ? "bg-primary text-primary-foreground shadow-sm"
+              ? "bg-accent text-foreground shadow-sm"
               : "bg-muted text-muted-foreground hover:bg-border"
           }`}
         >

@@ -4,8 +4,8 @@ import { useStations } from "@/hooks/use-stations";
 import { useFuelFilter } from "@/hooks/use-fuel-filter";
 import { computeThresholds } from "./station-source";
 
-const COLORS = ["#16a34a", "#65a30d", "#eab308", "#f97316", "#dc2626"];
-const NO_DATA_COLOR = "#94a3b8";
+const COLORS = ["#58D68D", "#82E0AA", "#F7DC6F", "#F5B041", "#E8453C"];
+const NO_DATA_COLOR = "#C4B5A8";
 
 function formatPrice(p: number) {
   return `${p.toFixed(1)}p`;
@@ -28,8 +28,8 @@ export function Legend() {
   ];
 
   return (
-    <div className="rounded-lg bg-white/95 p-3 shadow-lg backdrop-blur-sm">
-      <h4 className="mb-2 text-xs font-semibold text-foreground">Price per litre</h4>
+    <div className="rounded-xl bg-card/95 p-3 shadow-lg backdrop-blur-sm">
+      <h4 className="mb-2 font-heading text-xs font-semibold text-foreground">Price per litre</h4>
       <div className="space-y-1">
         {items.map((item) => (
           <div key={item.label} className="flex items-center gap-2">

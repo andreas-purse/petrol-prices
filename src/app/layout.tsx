@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
+import { Fredoka, Nunito } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  variable: "--font-fredoka",
+  display: "swap",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-nunito",
+  display: "swap",
+});
 
 const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -46,7 +59,7 @@ export default function RootLayout({
 }>) {
   const inner = (
     <html lang="en">
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+      <body className={`${fredoka.variable} ${nunito.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
         {children}
       </body>
     </html>

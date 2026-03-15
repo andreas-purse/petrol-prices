@@ -1,20 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1d4ed8;
-  --color-primary-foreground: #ffffff;
-  --color-background: #ffffff;
-  --color-foreground: #0a0a0a;
-  --color-muted: #f5f5f5;
-  --color-muted-foreground: #737373;
-  --color-border: #e5e5e5;
-  --color-card: #ffffff;
-  --color-card-foreground: #0a0a0a;
-  --color-destructive: #dc2626;
+  --color-primary: #E8453C;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #5DADE2;
+  --color-accent: #F7DC6F;
+  --color-pink: #F1948A;
+  --color-background: #FFF8F0;
+  --color-foreground: #2C1810;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #2C1810;
+  --color-muted: #FDE9D9;
+  --color-muted-foreground: #8B6F5E;
+  --color-border: #E8D5C4;
+  --color-destructive: #C0392B;
   --color-cheap: #16a34a;
   --color-mid: #eab308;
   --color-expensive: #dc2626;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
 }
 
 html,
@@ -22,4 +26,11 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* MapLibre popup overrides */
+.maplibregl-popup-content {
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 24px rgba(44, 24, 16, 0.12) !important;
+  border: 1px solid #E8D5C4 !important;
 }
