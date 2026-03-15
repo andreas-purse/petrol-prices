@@ -74,8 +74,9 @@ function HomePage() {
       <Header />
       <div className="relative flex flex-1 overflow-hidden">
         {/* Desktop sidebar */}
-        <div className="hidden w-[380px] flex-shrink-0 border-r border-white/10 md:block">
-          {panel}
+        <div className="hidden flex-shrink-0 md:flex">
+          <div className="w-[380px]">{panel}</div>
+          <div className="w-[2px] bg-gradient-to-b from-[#FFD600] via-[#FF8800] to-[#FF4060]" />
         </div>
 
         {/* Map */}

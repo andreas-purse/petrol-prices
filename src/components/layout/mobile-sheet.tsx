@@ -20,8 +20,9 @@ export function MobileSheet({ children }: MobileSheetProps) {
         className="flex w-full items-center justify-center py-2"
         aria-label={isExpanded ? "Collapse panel" : "Expand panel"}
       >
-        <div className="h-1 w-10 rounded-full bg-white/20" />
+        <div className="speed-stripe h-1 w-12 rounded-full" />
       </button>
+      <div className="speed-stripe-thin" />
       <div className="h-[calc(100%-24px)] overflow-y-auto">{children}</div>
     </div>
   );

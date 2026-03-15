@@ -5,18 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary: #FF6B35;
+  --color-primary: #FF8800;
   --color-primary-foreground: #FFFFFF;
   --color-secondary: #3B82F6;
-  --color-accent: #FF6B35;
-  --color-pink: #E040A0;
-  --color-background: #0a0f1a;
+  --color-accent: #FF8800;
+  --color-pink: #FF4060;
+  --color-background: #0C0E14;
   --color-foreground: #E8ECF1;
-  --color-card: #151A2E;
+  --color-card: #141820;
   --color-card-foreground: #E8ECF1;
   --color-muted: #111827;
-  --color-muted-foreground: #8899AA;
-  --color-border: #2A2F42;
+  --color-muted-foreground: #9A8E80;
+  --color-border: #2A2520;
   --color-destructive: #EF4444;
   --color-cheap: #16a34a;
   --color-mid: #eab308;
@@ -34,21 +34,53 @@ body {
 
 /* Utility classes */
 .horizon-gradient-text {
-  background: linear-gradient(135deg, #FF6B35 0%, #E040A0 50%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #FFD600 0%, #FF8800 40%, #FF4060 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .glow-primary {
-  box-shadow: 0 0 15px rgba(255, 107, 53, 0.4), 0 0 30px rgba(255, 107, 53, 0.1);
+  box-shadow: 0 0 20px rgba(255, 136, 0, 0.35), 0 0 40px rgba(255, 136, 0, 0.1);
 }
 
 .glass-panel {
-  background: rgba(21, 26, 46, 0.85);
+  background: rgba(20, 24, 32, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 136, 0, 0.08);
+  border-top: 2px solid rgba(255, 136, 0, 0.15);
+}
+
+/* Bold italic racing heading */
+.racing-heading {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Gradient speed stripe divider */
+.speed-stripe {
+  height: 3px;
+  background: linear-gradient(90deg, #FFD600, #FF8800, #FF4060);
+  border-radius: 2px;
+}
+
+/* Subtle thin speed stripe */
+.speed-stripe-thin {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #FF8800, transparent);
+}
+
+/* Pulsing glow for active/selected elements */
+@keyframes checkpoint-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 136, 0, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 136, 0, 0.6), 0 0 40px rgba(255, 136, 0, 0.2); }
+}
+.checkpoint-pulse {
+  animation: checkpoint-pulse 2s ease-in-out infinite;
 }
 
 /* MapLibre popup overrides */
@@ -57,7 +89,7 @@ body {
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border-radius: 1rem !important;
-  box-shadow: 0 0 20px rgba(255, 107, 53, 0.15), 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 0 25px rgba(255, 136, 0, 0.2), 0 8px 32px rgba(0, 0, 0, 0.5) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: #E8ECF1 !important;
 }

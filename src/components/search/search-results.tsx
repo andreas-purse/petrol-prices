@@ -43,39 +43,44 @@ export function SearchResults({ stations, fuel, isLoading }: SearchResultsProps)
 
   return (
     <div className="divide-y divide-white/10">
-      {stations.map((station) => (
-        <div key={station.id} className="p-3 transition-colors hover:bg-white/[0.08]">
-          <div className="flex items-start justify-between">
-            <div className="min-w-0 flex-1">
-              <h4 className="truncate text-sm font-semibold">{station.brand}</h4>
-              <p className="truncate text-xs text-muted-foreground">{station.address}</p>
-              <p className="text-xs text-muted-foreground">
-                {station.postcode} &middot; {formatDistance(station.distance)}
-              </p>
-              {station.updatedAt && (
-                <FreshnessBadge updatedAt={station.updatedAt} />
+      {stations.map((station, index) => (
+        <div key={station.id} className={`flex items-start p-3 transition-colors hover:bg-white/[0.08] ${index === 0 ? "border-l-3 border-l-[#FFD600] bg-white/[0.04]" : ""}`}>
+          <span className="racing-heading text-2xl text-primary/30 mr-3 w-8 shrink-0 text-center">
+            {index + 1}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between">
+              <div className="min-w-0 flex-1">
+                <h4 className="font-heading truncate text-sm font-semibold uppercase tracking-wide">{station.brand}</h4>
+                <p className="truncate text-xs text-muted-foreground">{station.address}</p>
+                <p className="text-xs text-muted-foreground">
+                  {station.postcode} &middot; {formatDistance(station.distance)}
+                </p>
+                {station.updatedAt && (
+                  <FreshnessBadge updatedAt={station.updatedAt} />
+                )}
+              </div>
+              {station.prices[fuel] !== undefined && (
+                <div className="ml-2 text-right">
+                  <span className="racing-heading text-lg text-primary">
+                    {formatPrice(station.prices[fuel]!)}
+                  </span>
+                  <p className="text-xs text-muted-foreground">{FUEL_LABELS[fuel]}</p>
+                </div>
               )}
             </div>
-            {station.prices[fuel] !== undefined && (
-              <div className="ml-2 text-right">
-                <span className="text-lg font-bold text-primary">
-                  {formatPrice(station.prices[fuel]!)}
-                </span>
-                <p className="text-xs text-muted-foreground">{FUEL_LABELS[fuel]}</p>
+            {Object.keys(station.prices).length > 1 && (
+              <div className="mt-1 flex gap-3">
+                {(Object.entries(station.prices) as [FuelType, number][])
+                  .filter(([f]) => f !== fuel)
+                  .map(([f, p]) => (
+                    <span key={f} className="text-xs text-muted-foreground">
+                      {FUEL_LABELS[f] ?? f}: {formatPrice(p)}
+                    </span>
+                  ))}
               </div>
             )}
           </div>
-          {Object.keys(station.prices).length > 1 && (
-            <div className="mt-1 flex gap-3">
-              {(Object.entries(station.prices) as [FuelType, number][])
-                .filter(([f]) => f !== fuel)
-                .map(([f, p]) => (
-                  <span key={f} className="text-xs text-muted-foreground">
-                    {FUEL_LABELS[f] ?? f}: {formatPrice(p)}
-                  </span>
-                ))}
-            </div>
-          )}
         </div>
       ))}
     </div>

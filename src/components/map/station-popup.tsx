@@ -27,7 +27,7 @@ export function StationPopup({ station, onClose }: StationPopupProps) {
       className="station-popup"
     >
       <div className="min-w-[200px] p-1">
-        <h3 className="font-heading text-sm font-bold uppercase tracking-wide text-foreground">{properties.brand}</h3>
+        <h3 className="font-heading text-sm font-bold italic uppercase tracking-wide text-foreground">{properties.brand}</h3>
         <p className="text-xs text-muted-foreground">{properties.address}</p>
         {properties.postcode && (
           <p className="text-xs text-muted-foreground">{properties.postcode}</p>
@@ -42,10 +42,10 @@ export function StationPopup({ station, onClose }: StationPopupProps) {
           {(Object.entries(properties.prices) as [FuelType, number][]).map(
             ([fuel, price]) => (
               <div key={fuel} className="flex justify-between text-sm">
-                <span className="text-muted-foreground">
+                <span className="font-heading text-muted-foreground">
                   {FUEL_LABELS[fuel] ?? fuel}
                 </span>
-                <span className="font-semibold">{formatPrice(price)}</span>
+                <span className="font-heading font-semibold">{formatPrice(price)}</span>
               </div>
             ),
           )}

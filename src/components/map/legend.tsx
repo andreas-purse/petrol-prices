@@ -30,8 +30,8 @@ export function Legend() {
   ];
 
   return (
-    <div className="glass-panel rounded-xl p-3 shadow-lg" style={{ boxShadow: '0 0 20px rgba(255,107,53,0.1), 0 8px 32px rgba(0,0,0,0.3)' }}>
-      <h4 className="mb-2 font-heading text-xs font-semibold uppercase tracking-wide text-foreground">Price per litre</h4>
+    <div className="glass-panel rounded-lg p-3 shadow-lg" style={{ boxShadow: '0 0 20px rgba(255,136,0,0.1), 0 8px 32px rgba(0,0,0,0.3)' }}>
+      <h4 className="racing-heading mb-2 text-xs text-foreground">FUEL PRICES</h4>
       {/* Heatmap gradient bar */}
       <div className="mb-2">
         <div
@@ -51,7 +51,7 @@ export function Legend() {
               className="inline-block h-3 w-3 rounded-full"
               style={{ backgroundColor: item.color }}
             />
-            <span className="text-xs text-muted-foreground">{item.label}</span>
+            <span className="font-heading text-xs text-muted-foreground">{item.label}</span>
           </div>
         ))}
       </div>
