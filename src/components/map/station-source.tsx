@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Source, Layer } from "react-map-gl/maplibre";
 import type { LayerProps, MapLayerMouseEvent } from "react-map-gl/maplibre";
 import type { StationGeoJSON, StationFeature } from "@/hooks/use-stations";
@@ -60,43 +60,6 @@ function getPriceColor(
   return PRICE_COLORS[4];
 }
 
-const clusterLayer: LayerProps = {
-  id: "clusters",
-  type: "circle",
-  source: "stations",
-  filter: ["has", "point_count"],
-  paint: {
-    "circle-color": [
-      "step",
-      ["get", "point_count"],
-      "#60a5fa",
-      50,
-      "#3b82f6",
-      200,
-      "#2563eb",
-      500,
-      "#1d4ed8",
-    ],
-    "circle-radius": ["step", ["get", "point_count"], 18, 50, 24, 200, 30, 500, 36],
-    "circle-stroke-width": 2,
-    "circle-stroke-color": "#ffffff",
-  },
-};
-
-const clusterCountLayer: LayerProps = {
-  id: "cluster-count",
-  type: "symbol",
-  source: "stations",
-  filter: ["has", "point_count"],
-  layout: {
-    "text-field": "{point_count_abbreviated}",
-    "text-size": 13,
-  },
-  paint: {
-    "text-color": "#ffffff",
-  },
-};
-
 interface StationSourceProps {
   geojson: StationGeoJSON;
   fuel: FuelType;
@@ -108,16 +71,55 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
 
   const thresholds = computeThresholds(geojson.features, fuel);
 
-  // Color unclustered points by price
-  const coloredGeojson = {
-    ...geojson,
-    features: geojson.features.map((f) => ({
-      ...f,
-      properties: {
-        ...f.properties,
-        _color: getPriceColor(f.properties.prices[fuel], thresholds),
-      },
-    })),
+  // Color unclustered points by price, add _price for cluster aggregation
+  const coloredGeojson = useMemo(
+    () => ({
+      ...geojson,
+      features: geojson.features.map((f) => {
+        const price = f.properties.prices[fuel];
+        return {
+          ...f,
+          properties: {
+            ...f.properties,
+            _color: getPriceColor(price, thresholds),
+            _price: typeof price === "number" && price > 0 ? price : 0,
+            _hasPrice: typeof price === "number" && price > 0 ? 1 : 0,
+          },
+        };
+      }),
+    }),
+    [geojson, fuel, thresholds]
+  );
+
+  // Build cluster color expression using dynamic thresholds
+  const clusterColorExpr: maplibregl.ExpressionSpecification = [
+    "case",
+    // If no stations in cluster have prices, show gray
+    ["==", ["get", "priceCount"], 0],
+    NO_DATA_COLOR,
+    // Otherwise color by average price using thresholds
+    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p20],
+    PRICE_COLORS[0],
+    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p40],
+    PRICE_COLORS[1],
+    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p60],
+    PRICE_COLORS[2],
+    ["<=", ["/", ["get", "priceSum"], ["get", "priceCount"]], thresholds.p80],
+    PRICE_COLORS[3],
+    PRICE_COLORS[4],
+  ];
+
+  const clusterLayer: LayerProps = {
+    id: "clusters",
+    type: "circle",
+    source: "stations",
+    filter: ["has", "point_count"],
+    paint: {
+      "circle-color": clusterColorExpr,
+      "circle-radius": ["step", ["get", "point_count"], 18, 50, 24, 200, 30, 500, 36],
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#ffffff",
+    },
   };
 
   const dynamicPointLayer: LayerProps = {
@@ -198,9 +200,12 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       cluster
       clusterMaxZoom={14}
       clusterRadius={50}
+      clusterProperties={{
+        priceSum: ["+", ["get", "_price"]],
+        priceCount: ["+", ["get", "_hasPrice"]],
+      }}
     >
       <Layer {...clusterLayer} />
-      <Layer {...clusterCountLayer} />
       <Layer {...dynamicPointLayer} />
     </Source>
   );
