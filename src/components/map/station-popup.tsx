@@ -27,7 +27,7 @@ export function StationPopup({ station, onClose }: StationPopupProps) {
       className="station-popup"
     >
       <div className="min-w-[200px] p-1">
-        <h3 className="font-heading text-sm font-bold text-foreground">{properties.brand}</h3>
+        <h3 className="font-heading text-sm font-bold uppercase tracking-wide text-foreground">{properties.brand}</h3>
         <p className="text-xs text-muted-foreground">{properties.address}</p>
         {properties.postcode && (
           <p className="text-xs text-muted-foreground">{properties.postcode}</p>

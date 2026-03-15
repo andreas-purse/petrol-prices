@@ -24,9 +24,9 @@ export function SearchResults({ stations, fuel, isLoading }: SearchResultsProps)
     return (
       <div className="space-y-3 p-4">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="animate-pulse rounded-lg bg-muted p-3">
-            <div className="mb-2 h-4 w-3/4 rounded bg-border" />
-            <div className="h-3 w-1/2 rounded bg-border" />
+          <div key={i} className="animate-pulse rounded-lg bg-white/[0.06] p-3">
+            <div className="mb-2 h-4 w-3/4 rounded bg-white/10" />
+            <div className="h-3 w-1/2 rounded bg-white/10" />
           </div>
         ))}
       </div>
@@ -42,9 +42,9 @@ export function SearchResults({ stations, fuel, isLoading }: SearchResultsProps)
   }
 
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-white/10">
       {stations.map((station) => (
-        <div key={station.id} className="p-3 transition-colors hover:bg-muted">
+        <div key={station.id} className="p-3 transition-colors hover:bg-white/[0.08]">
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1">
               <h4 className="truncate text-sm font-semibold">{station.brand}</h4>

@@ -18,10 +18,10 @@ export function FuelTypeFilter({ selected, onChange }: FuelTypeFilterProps) {
           role="radio"
           aria-checked={selected === fuel}
           onClick={() => onChange(fuel)}
-          className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${
+          className={`rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-all ${
             selected === fuel
-              ? "bg-accent text-foreground shadow-sm"
-              : "bg-muted text-muted-foreground hover:bg-border"
+              ? "bg-primary/20 text-primary border border-primary/40 shadow-[0_0_10px_rgba(255,107,53,0.2)]"
+              : "bg-white/[0.06] border border-transparent text-muted-foreground hover:bg-white/[0.12]"
           }`}
         >
           {FUEL_LABELS[fuel]}

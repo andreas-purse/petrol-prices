@@ -10,7 +10,7 @@ import { useStations, type StationFeature } from "@/hooks/use-stations";
 import type { FuelType } from "@/hooks/use-fuel-filter";
 
 const MAP_STYLE =
-  process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/liberty";
+  process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/dark";
 
 const UK_CENTER = { latitude: 54.5, longitude: -2.5 };
 const INITIAL_ZOOM = 6;
@@ -49,7 +49,7 @@ export function StationMap({ fuel, searchLat, searchLng }: StationMapProps) {
   return (
     <div className="relative h-full w-full">
       {isLoading && (
-        <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2 rounded-xl bg-card px-4 py-2 shadow-lg">
+        <div className="glass-panel absolute top-4 left-1/2 z-10 -translate-x-1/2 rounded-xl px-4 py-2 shadow-lg">
           <p className="text-sm text-muted-foreground">Loading stations...</p>
         </div>
       )}

@@ -27,20 +27,20 @@ export function SearchBar({ onSearch, onLocate, isSearching, error }: SearchBarP
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Enter postcode (e.g. SW1A 1AA)"
-          className="flex-1 rounded-xl border-2 border-border bg-card px-4 py-2 text-sm shadow-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="flex-1 rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2 text-sm text-foreground shadow-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(255,107,53,0.15)]"
           aria-label="Search by postcode"
         />
         <button
           type="submit"
           disabled={isSearching || !query.trim()}
-          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="rounded-xl bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(255,107,53,0.4)] disabled:opacity-50"
         >
           {isSearching ? "..." : "Search"}
         </button>
         <button
           type="button"
           onClick={onLocate}
-          className="rounded-xl border-2 border-border bg-card px-3 py-2 text-sm shadow-sm transition-colors hover:bg-muted"
+          className="rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2 text-sm shadow-sm transition-all hover:bg-white/[0.12]"
           title="Use my location"
           aria-label="Use my location"
         >

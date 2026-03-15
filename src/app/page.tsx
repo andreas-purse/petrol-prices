@@ -74,7 +74,7 @@ function HomePage() {
       <Header />
       <div className="relative flex flex-1 overflow-hidden">
         {/* Desktop sidebar */}
-        <div className="hidden w-[380px] flex-shrink-0 border-r border-border md:block">
+        <div className="hidden w-[380px] flex-shrink-0 border-r border-white/10 md:block">
           {panel}
         </div>
 

@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
-import { Fredoka, Nunito } from "next/font/google";
+import { Exo_2, Inter, Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const fredoka = Fredoka({
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
+const exo2 = Exo_2({
   subsets: ["latin"],
-  variable: "--font-fredoka",
+  variable: "--font-exo2",
   display: "swap",
 });
 
-const nunito = Nunito({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -58,8 +61,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const inner = (
-    <html lang="en">
-      <body className={`${fredoka.variable} ${nunito.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
+    <html lang="en" className={cn("font-sans", geist.variable)}>
+      <body className={`${exo2.variable} ${inter.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
         {children}
       </body>
     </html>

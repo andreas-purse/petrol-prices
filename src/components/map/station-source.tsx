@@ -8,14 +8,14 @@ import type { FuelType } from "@/hooks/use-fuel-filter";
 import { useMap } from "react-map-gl/maplibre";
 
 const PRICE_COLORS = [
-  "#58D68D", // mint      — cheapest 20%
-  "#82E0AA", // seafoam   — 20-40%
-  "#F7DC6F", // yellow    — 40-60%
-  "#F5B041", // tangerine — 60-80%
-  "#E8453C", // red       — most expensive 20%
+  "#00FF88", // neon green  — cheapest 20%
+  "#00D4FF", // cyan        — 20-40%
+  "#FFD600", // gold        — 40-60%
+  "#FF8C00", // orange      — 60-80%
+  "#FF3355", // hot pink    — most expensive 20%
 ] as const;
 
-const NO_DATA_COLOR = "#C4B5A8";
+const NO_DATA_COLOR = "#3A4055";
 
 export interface PriceThresholds {
   p20: number;
@@ -118,7 +118,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       "circle-color": clusterColorExpr,
       "circle-radius": ["step", ["get", "point_count"], 18, 50, 24, 200, 30, 500, 36],
       "circle-stroke-width": 2,
-      "circle-stroke-color": "#ffffff",
+      "circle-stroke-color": "rgba(255,255,255,0.3)",
     },
   };
 
@@ -130,7 +130,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     paint: {
       "circle-radius": 7,
       "circle-stroke-width": 2,
-      "circle-stroke-color": "#ffffff",
+      "circle-stroke-color": "rgba(255,255,255,0.3)",
       "circle-color": ["get", "_color"],
     },
   };
