@@ -9,8 +9,6 @@ Interactive map showing live UK petrol station prices. Data comes from 14 CMA-ma
 - **Framework**: Next.js 16 (App Router, TypeScript)
 - **Database**: SQLite via Turso (libSQL) + Drizzle ORM
 - **Map**: MapLibre GL JS via react-map-gl
-- **Auth**: Clerk (optional — app works without keys)
-- **Payments**: Stripe (£1 one-time Pro unlock)
 - **Styling**: Tailwind CSS v4
 - **Testing**: Vitest (unit/component), Playwright (e2e/screenshots)
 - **Deployment**: Vercel (frontend + cron) + Turso (database)
@@ -51,18 +49,11 @@ Screenshot files are saved to:
 
 - `src/app/` — Next.js pages and API routes
 - `src/app/about/` — About Our Data page (CMA explanation)
-- `src/app/api/checkout/` — Stripe checkout session creation
-- `src/app/api/pro/` — Pro status check
-- `src/app/api/stations/optimal/` — Optimal Station Finder (Pro feature)
-- `src/app/api/stations/saved/` — Saved stations CRUD (auth required)
-- `src/app/api/webhooks/stripe/` — Stripe payment webhook
-- `src/components/` — React components (map, search, filters, panels, layout, auth, ui)
+- `src/components/` — React components (map, search, filters, panels, layout, ui)
 - `src/db/` — Drizzle schema and database client
 - `src/hooks/` — Client-side React hooks (SWR data fetching)
 - `src/lib/feeds/` — CMA retailer feed fetching and normalization
 - `src/lib/ingestion/` — Database upsert logic
-- `src/lib/pro.ts` — Pro user check helper
-- `src/middleware.ts` — Clerk auth middleware
 - `e2e/` — Playwright tests and snapshot specs
 - `snapshots/` — Screenshot output (gitignored)
 
@@ -73,9 +64,6 @@ Uses SQLite via Turso. For local dev, defaults to `file:local.db` (no setup need
 ### Tables
 - `stations` — 7,000+ fuel stations with coordinates
 - `prices` — Price history per station per fuel type
-- `users` — Clerk user ID mapping
-- `saved_stations` — User's favorite stations
-- `purchases` — Stripe Pro purchase records
 
 Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for production. See `.env.example`.
 
@@ -85,8 +73,6 @@ Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for production. See `.env.exampl
 - Fuel types: E10 (unleaded), E5 (super unleaded), B7 (diesel), SDV (super diesel)
 - Prices in pence per litre (e.g. 138.9)
 - Station coordinates validated to UK bounds (lat 49-61, lng -8 to 2)
-- Clerk auth is optional — app works without NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-- Stripe is optional — Pro features hidden without STRIPE_SECRET_KEY
 
 ## Deployment
 
@@ -96,5 +82,3 @@ Environment variables needed (see `.env.example`):
 - `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` — Database
 - `INGEST_API_KEY`, `CRON_SECRET` — Ingestion auth
 - `NEXT_PUBLIC_MAP_STYLE_URL` — Map tiles
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` — Auth (optional)
-- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — Payments (optional)

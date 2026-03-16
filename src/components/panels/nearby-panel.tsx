@@ -3,7 +3,7 @@
 import { SearchBar } from "@/components/search/search-bar";
 import { SearchResults } from "@/components/search/search-results";
 import { FuelTypeFilter } from "@/components/filters/fuel-type-filter";
-import { AuthButtons } from "@/components/auth/auth-buttons";
+
 import type { FuelType } from "@/hooks/use-fuel-filter";
 import type { NearbyStation } from "@/hooks/use-nearby";
 
@@ -61,7 +61,7 @@ export function NearbyPanel({
               </p>
             </div>
           </div>
-          <AuthButtons />
+          {/* Auth buttons removed */}
         </div>
         <div className="speed-stripe mt-3 mb-3" />
         <SearchBar

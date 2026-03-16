@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Exo_2, Inter, Geist } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
+
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,6 @@ const inter = Inter({
   display: "swap",
 });
 
-const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export const metadata: Metadata = {
   title: {
@@ -60,13 +59,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const inner = (
+  return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className={`${exo2.variable} ${inter.variable} min-h-screen bg-background font-sans text-foreground antialiased`}>
         {children}
       </body>
     </html>
   );
-
-  return clerkEnabled ? <ClerkProvider>{inner}</ClerkProvider> : inner;
 }

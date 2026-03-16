@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthButtons } from "@/components/auth/auth-buttons";
 
 function FuelIcon() {
   return (
@@ -27,7 +26,7 @@ export function Header() {
         <FuelIcon />
         <h1 className="horizon-gradient-text racing-heading text-xl">Find My Fuel</h1>
       </div>
-      <AuthButtons />
+      {/* Auth buttons removed */}
     </header>
   );
 }
