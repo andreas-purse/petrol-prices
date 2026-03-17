@@ -77,23 +77,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
 
   const thresholds = computeThresholds(geojson.features, fuel);
 
-  // Compute min/max prices for heatmap weight normalization
-  const priceRange = useMemo(() => {
-    if (isEv) return { min: 0, max: 1 };
-    const prices = geojson.features
-      .map((f) => f.properties.prices[fuel])
-      .filter((p): p is number => typeof p === "number" && p > 0);
-    if (prices.length === 0) return { min: 120, max: 160 };
-    let min = Infinity;
-    let max = -Infinity;
-    for (const p of prices) {
-      if (p < min) min = p;
-      if (p > max) max = p;
-    }
-    return { min, max };
-  }, [geojson, fuel, isEv]);
-
-  // Add _color and _price properties for each feature
+  // Add _color property for each feature
   const coloredGeojson = useMemo(
     () => ({
       ...geojson,
@@ -104,7 +88,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
             properties: {
               ...f.properties,
               _color: EV_COLOR,
-              _price: 0,
             },
           };
         }
@@ -114,7 +97,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
           properties: {
             ...f.properties,
             _color: getPriceColor(price, thresholds),
-            _price: typeof price === "number" && price > 0 ? price : 0,
           },
         };
       }),
@@ -122,66 +104,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     [geojson, fuel, thresholds, isEv]
   );
 
-  // Heatmap layer — hidden for EV, visible at low zoom for fuel
-  const heatmapLayer: LayerProps = {
-    id: "station-heat",
-    type: "heatmap",
-    source: "stations",
-    paint: {
-      "heatmap-weight": isEv
-        ? 0
-        : ([
-            "interpolate",
-            ["linear"],
-            ["get", "_price"],
-            0, 0,
-            priceRange.min, 0.15,
-            priceRange.max, 1,
-          ] as maplibregl.ExpressionSpecification),
-      "heatmap-intensity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0, 0.6,
-        6, 1,
-        10, 1.5,
-      ] as maplibregl.ExpressionSpecification,
-      "heatmap-color": [
-        "interpolate",
-        ["linear"],
-        ["heatmap-density"],
-        0, "rgba(0,0,0,0)",
-        0.1, "#0044FF",
-        0.25, "#00D4FF",
-        0.4, "#00FF88",
-        0.6, "#FFD600",
-        0.8, "#FF8C00",
-        1, "#FF3355",
-      ] as maplibregl.ExpressionSpecification,
-      "heatmap-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0, 4,
-        5, 12,
-        8, 20,
-        11, 30,
-        13, 40,
-      ] as maplibregl.ExpressionSpecification,
-      "heatmap-opacity": isEv
-        ? 0
-        : ([
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            10, 0.8,
-            12, 0.3,
-            14, 0,
-          ] as maplibregl.ExpressionSpecification),
-    },
-  };
-
-  // Individual station points
+  // Price-colored points — visible at all zoom levels
   const pointLayer: LayerProps = {
     id: "unclustered-point",
     type: "circle",
@@ -191,32 +114,23 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
         "interpolate",
         ["linear"],
         ["zoom"],
-        ...(isEv ? [4, 4, 10, 6, 13, 8, 16, 10] : [10, 3, 13, 7, 16, 10]),
+        4, 2,
+        8, 4,
+        12, 7,
+        16, 10,
       ],
-      "circle-stroke-width": 2,
+      "circle-stroke-width": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        4, 0.5,
+        10, 1.5,
+        14, 2,
+      ],
       "circle-stroke-color": isEv ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.3)",
       "circle-color": ["get", "_color"],
-      // EV points visible at all zooms, fuel points fade in
-      "circle-opacity": isEv
-        ? 0.9
-        : ([
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            10, 0,
-            12, 0.7,
-            14, 1,
-          ] as maplibregl.ExpressionSpecification),
-      "circle-stroke-opacity": isEv
-        ? 0.9
-        : ([
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            10, 0,
-            12, 0.7,
-            14, 1,
-          ] as maplibregl.ExpressionSpecification),
+      "circle-opacity": 0.9,
+      "circle-stroke-opacity": 0.9,
     },
   };
 
@@ -285,7 +199,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       type="geojson"
       data={coloredGeojson}
     >
-      <Layer {...heatmapLayer} />
       <Layer {...pointLayer} />
     </Source>
   );
