@@ -3,9 +3,11 @@
 import { SearchBar } from "@/components/search/search-bar";
 import { SearchResults } from "@/components/search/search-results";
 import { FuelTypeFilter } from "@/components/filters/fuel-type-filter";
+import { DriverCalculator } from "@/components/calculator/driver-calculator";
 
 import type { FuelType } from "@/hooks/use-fuel-filter";
 import type { NearbyStation } from "@/hooks/use-nearby";
+import type { CalcSettings } from "@/hooks/use-calc-settings";
 
 function FuelIcon() {
   return (
@@ -35,6 +37,8 @@ interface NearbyPanelProps {
   nearbyStations: NearbyStation[];
   isLoadingNearby: boolean;
   hasSearched: boolean;
+  calcSettings: CalcSettings;
+  onCalcSettingsChange: (update: Partial<CalcSettings>) => void;
 }
 
 export function NearbyPanel({
@@ -47,6 +51,8 @@ export function NearbyPanel({
   nearbyStations,
   isLoadingNearby,
   hasSearched,
+  calcSettings,
+  onCalcSettingsChange,
 }: NearbyPanelProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[#0d1220]/95 backdrop-blur-xl">
@@ -61,7 +67,6 @@ export function NearbyPanel({
               </p>
             </div>
           </div>
-          {/* Auth buttons removed */}
         </div>
         <div className="speed-stripe mt-3 mb-3" />
         <SearchBar
@@ -74,12 +79,20 @@ export function NearbyPanel({
           <FuelTypeFilter selected={fuel} onChange={onFuelChange} />
         </div>
       </div>
+
+      {/* Driver Calculator */}
+      <DriverCalculator
+        settings={calcSettings}
+        onSettingsChange={onCalcSettingsChange}
+      />
+
       <div className="flex-1 overflow-y-auto">
         {hasSearched ? (
           <SearchResults
             stations={nearbyStations}
             fuel={fuel}
             isLoading={isLoadingNearby}
+            calcSettings={calcSettings}
           />
         ) : (
           <div className="p-4 text-center text-sm text-muted-foreground">

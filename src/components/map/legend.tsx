@@ -14,10 +14,32 @@ function formatPrice(p: number) {
 }
 
 export function Legend() {
-  const { stations } = useStations();
   const { fuel } = useFuelFilter();
+  const { stations } = useStations(fuel);
 
   const features = stations?.features ?? [];
+  const isEv = fuel === "EV";
+
+  if (isEv) {
+    return (
+      <div className="glass-panel rounded-lg p-3 shadow-lg" style={{ boxShadow: '0 0 20px rgba(34,197,94,0.1), 0 8px 32px rgba(0,0,0,0.3)' }}>
+        <h4 className="racing-heading mb-2 text-xs text-foreground">EV CHARGING</h4>
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block h-3 w-3 rounded-full"
+            style={{ backgroundColor: "#22C55E" }}
+          />
+          <span className="font-heading text-xs text-muted-foreground">
+            EV Charging Station
+          </span>
+        </div>
+        <p className="mt-1.5 text-[10px] text-muted-foreground">
+          Data from Open Charge Map
+        </p>
+      </div>
+    );
+  }
+
   const t = computeThresholds(features, fuel);
 
   const items = [
@@ -45,8 +67,8 @@ export function Legend() {
       </div>
       {/* Point color legend */}
       <div className="space-y-1">
-        {items.map((item) => (
-          <div key={item.label} className="flex items-center gap-2">
+        {items.map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
             <span
               className="inline-block h-3 w-3 rounded-full"
               style={{ backgroundColor: item.color }}

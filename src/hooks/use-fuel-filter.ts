@@ -3,13 +3,14 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback } from "react";
 
-export type FuelType = "E10" | "E5" | "B7" | "SDV";
+export type FuelType = "E10" | "E5" | "B7" | "SDV" | "EV";
 
 export const FUEL_LABELS: Record<FuelType, string> = {
   E10: "Unleaded (E10)",
   E5: "Super Unleaded (E5)",
   B7: "Diesel",
   SDV: "Super Diesel",
+  EV: "EV Charging",
 };
 
 export function useFuelFilter() {

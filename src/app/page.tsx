@@ -9,6 +9,7 @@ import { MapControls } from "@/components/map/map-controls";
 import { useSearch } from "@/hooks/use-search";
 import { useNearby } from "@/hooks/use-nearby";
 import { useFuelFilter } from "@/hooks/use-fuel-filter";
+import { useCalcSettings } from "@/hooks/use-calc-settings";
 
 // Dynamically import map to avoid SSR issues with MapLibre
 const StationMap = dynamic(
@@ -30,6 +31,7 @@ function HomePage() {
     lat: number;
     lng: number;
   } | null>(null);
+  const { settings: calcSettings, setSettings: setCalcSettings } = useCalcSettings();
 
   const searchLat = searchResult?.latitude ?? userLocation?.lat ?? null;
   const searchLng = searchResult?.longitude ?? userLocation?.lng ?? null;
@@ -66,6 +68,8 @@ function HomePage() {
       nearbyStations={nearby}
       isLoadingNearby={isLoadingNearby}
       hasSearched={hasSearched}
+      calcSettings={calcSettings}
+      onCalcSettingsChange={setCalcSettings}
     />
   );
 

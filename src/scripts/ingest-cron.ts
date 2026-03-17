@@ -12,6 +12,8 @@ async function main() {
         event: "ingestion_complete",
         totalStations: result.totalStations,
         totalPricesInserted: result.totalPricesInserted,
+        evStationsUpserted: result.evStationsUpserted,
+        evConnectorsInserted: result.evConnectorsInserted,
         durationMs: result.durationMs,
         feeds: result.feedResults,
       }),

@@ -16,6 +16,7 @@ const PRICE_COLORS = [
 ] as const;
 
 const NO_DATA_COLOR = "#3A4055";
+const EV_COLOR = "#22C55E";
 
 export interface PriceThresholds {
   p20: number;
@@ -28,6 +29,10 @@ export function computeThresholds(
   features: StationFeature[],
   fuel: FuelType
 ): PriceThresholds {
+  if (fuel === "EV") {
+    return { p20: 0, p40: 0, p60: 0, p80: 0 };
+  }
+
   const prices = features
     .map((f) => f.properties.prices[fuel])
     .filter((p): p is number => typeof p === "number" && p > 0)
@@ -68,11 +73,13 @@ interface StationSourceProps {
 
 export function StationSource({ geojson, fuel, onStationClick }: StationSourceProps) {
   const { current: map } = useMap();
+  const isEv = fuel === "EV";
 
   const thresholds = computeThresholds(geojson.features, fuel);
 
   // Compute min/max prices for heatmap weight normalization
   const priceRange = useMemo(() => {
+    if (isEv) return { min: 0, max: 1 };
     const prices = geojson.features
       .map((f) => f.properties.prices[fuel])
       .filter((p): p is number => typeof p === "number" && p > 0);
@@ -84,13 +91,23 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       if (p > max) max = p;
     }
     return { min, max };
-  }, [geojson, fuel]);
+  }, [geojson, fuel, isEv]);
 
   // Add _color and _price properties for each feature
   const coloredGeojson = useMemo(
     () => ({
       ...geojson,
       features: geojson.features.map((f) => {
+        if (isEv) {
+          return {
+            ...f,
+            properties: {
+              ...f.properties,
+              _color: EV_COLOR,
+              _price: 0,
+            },
+          };
+        }
         const price = f.properties.prices[fuel];
         return {
           ...f,
@@ -102,25 +119,25 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
         };
       }),
     }),
-    [geojson, fuel, thresholds]
+    [geojson, fuel, thresholds, isEv]
   );
 
-  // Heatmap layer — visible at low zoom, fades out as you zoom in
+  // Heatmap layer — hidden for EV, visible at low zoom for fuel
   const heatmapLayer: LayerProps = {
     id: "station-heat",
     type: "heatmap",
     source: "stations",
     paint: {
-      // Weight by price — higher price = more "heat"
-      "heatmap-weight": [
-        "interpolate",
-        ["linear"],
-        ["get", "_price"],
-        0, 0,
-        priceRange.min, 0.15,
-        priceRange.max, 1,
-      ] as maplibregl.ExpressionSpecification,
-      // Increase intensity with zoom
+      "heatmap-weight": isEv
+        ? 0
+        : ([
+            "interpolate",
+            ["linear"],
+            ["get", "_price"],
+            0, 0,
+            priceRange.min, 0.15,
+            priceRange.max, 1,
+          ] as maplibregl.ExpressionSpecification),
       "heatmap-intensity": [
         "interpolate",
         ["linear"],
@@ -129,7 +146,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
         6, 1,
         10, 1.5,
       ] as maplibregl.ExpressionSpecification,
-      // Color ramp: transparent → deep blue → cyan → green → gold → orange → hot pink
       "heatmap-color": [
         "interpolate",
         ["linear"],
@@ -142,7 +158,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
         0.8, "#FF8C00",
         1, "#FF3355",
       ] as maplibregl.ExpressionSpecification,
-      // Radius increases with zoom for smooth appearance
       "heatmap-radius": [
         "interpolate",
         ["linear"],
@@ -153,19 +168,20 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
         11, 30,
         13, 40,
       ] as maplibregl.ExpressionSpecification,
-      // Fade out heatmap at high zoom
-      "heatmap-opacity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        10, 0.8,
-        12, 0.3,
-        14, 0,
-      ] as maplibregl.ExpressionSpecification,
+      "heatmap-opacity": isEv
+        ? 0
+        : ([
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10, 0.8,
+            12, 0.3,
+            14, 0,
+          ] as maplibregl.ExpressionSpecification),
     },
   };
 
-  // Individual station points — fade in at high zoom
+  // Individual station points
   const pointLayer: LayerProps = {
     id: "unclustered-point",
     type: "circle",
@@ -175,30 +191,32 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
         "interpolate",
         ["linear"],
         ["zoom"],
-        10, 3,
-        13, 7,
-        16, 10,
+        ...(isEv ? [4, 4, 10, 6, 13, 8, 16, 10] : [10, 3, 13, 7, 16, 10]),
       ],
       "circle-stroke-width": 2,
-      "circle-stroke-color": "rgba(255,255,255,0.3)",
+      "circle-stroke-color": isEv ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.3)",
       "circle-color": ["get", "_color"],
-      // Fade in as heatmap fades out
-      "circle-opacity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        10, 0,
-        12, 0.7,
-        14, 1,
-      ],
-      "circle-stroke-opacity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        10, 0,
-        12, 0.7,
-        14, 1,
-      ],
+      // EV points visible at all zooms, fuel points fade in
+      "circle-opacity": isEv
+        ? 0.9
+        : ([
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10, 0,
+            12, 0.7,
+            14, 1,
+          ] as maplibregl.ExpressionSpecification),
+      "circle-stroke-opacity": isEv
+        ? 0.9
+        : ([
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            10, 0,
+            12, 0.7,
+            14, 1,
+          ] as maplibregl.ExpressionSpecification),
     },
   };
 
@@ -219,7 +237,22 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
             address: props.address,
             postcode: props.postcode,
             prices: typeof props.prices === "string" ? JSON.parse(props.prices) : props.prices,
+            pricesReportedAt: typeof props.pricesReportedAt === "string" ? JSON.parse(props.pricesReportedAt) : props.pricesReportedAt,
             updatedAt: props.updatedAt,
+            // EV fields
+            ...(props.type === "ev"
+              ? {
+                  type: "ev" as const,
+                  operator: props.operator,
+                  title: props.title,
+                  usageCost: props.usageCost,
+                  connectors:
+                    typeof props.connectors === "string"
+                      ? JSON.parse(props.connectors)
+                      : props.connectors,
+                  dateLastVerified: props.dateLastVerified,
+                }
+              : {}),
           },
         };
         onStationClick(stationFeature);

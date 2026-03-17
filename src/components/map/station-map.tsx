@@ -23,7 +23,7 @@ interface StationMapProps {
 
 export function StationMap({ fuel, searchLat, searchLng }: StationMapProps) {
   const mapRef = useRef<MapRef>(null);
-  const { stations, isLoading } = useStations();
+  const { stations, isLoading } = useStations(fuel);
   const [selectedStation, setSelectedStation] = useState<StationFeature | null>(null);
 
   const onStationClick = useCallback((feature: StationFeature) => {

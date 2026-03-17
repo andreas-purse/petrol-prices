@@ -1,16 +1,6 @@
 "use client";
 
-function getHoursAgo(isoString: string): number {
-  return (Date.now() - new Date(isoString).getTime()) / (1000 * 60 * 60);
-}
-
-function formatTimeAgo(isoString: string): string {
-  const hoursAgo = getHoursAgo(isoString);
-  if (hoursAgo < 1) return "Just now";
-  if (hoursAgo < 24) return `${Math.round(hoursAgo)}h ago`;
-  const days = Math.round(hoursAgo / 24);
-  return `${days}d ago`;
-}
+import { formatTimeAgo, getHoursAgo } from "@/lib/format-time-ago";
 
 interface FreshnessBadgeProps {
   updatedAt: string;
@@ -20,17 +10,13 @@ export function FreshnessBadge({ updatedAt }: FreshnessBadgeProps) {
   const hoursAgo = getHoursAgo(updatedAt);
 
   let colorClass: string;
-  let label: string;
 
   if (hoursAgo < 12) {
     colorClass = "bg-cheap";
-    label = "Fresh";
   } else if (hoursAgo < 48) {
     colorClass = "bg-mid";
-    label = "Aging";
   } else {
     colorClass = "bg-expensive";
-    label = "Stale";
   }
 
   return (

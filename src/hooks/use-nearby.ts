@@ -15,6 +15,14 @@ export interface NearbyStation {
   updatedAt: string;
   distance: number;
   prices: Record<string, number>;
+  pricesReportedAt?: Record<string, string>;
+  // EV-specific fields
+  type?: "ev";
+  operator?: string;
+  title?: string;
+  usageCost?: string;
+  connectors?: { type: string; powerKw: number | null; quantity: number }[];
+  dateLastVerified?: string;
 }
 
 export function useNearby(

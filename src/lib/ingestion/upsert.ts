@@ -1,74 +1,95 @@
 import { db } from "@/db";
 import { stations, prices } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, inArray, and, desc } from "drizzle-orm";
 import type { NormalizedStation } from "@/lib/feeds/types";
 
 export async function upsertStations(normalized: NormalizedStation[]): Promise<{
   upserted: number;
   pricesInserted: number;
 }> {
-  let upserted = 0;
-  let pricesInserted = 0;
+  if (normalized.length === 0) return { upserted: 0, pricesInserted: 0 };
 
-  for (const station of normalized) {
-    // Upsert station
-    const existing = await db
-      .select({ id: stations.id })
-      .from(stations)
-      .where(eq(stations.siteId, station.siteId))
-      .limit(1);
+  let upsertedCount = 0;
+  let pricesInsertedCount = 0;
 
-    let stationId: number;
-
-    if (existing.length > 0) {
-      stationId = existing[0]!.id;
-      await db
-        .update(stations)
-        .set({
-          brand: station.brand,
-          address: station.address,
-          postcode: station.postcode,
-          latitude: station.latitude,
-          longitude: station.longitude,
+  // Batch upsert stations in chunks to avoid parameter limits (SQLite limit is ~32k)
+  const chunkSize = 100;
+  for (let i = 0; i < normalized.length; i += chunkSize) {
+    const chunk = normalized.slice(i, i + chunkSize);
+    
+    // 1. Batch Upsert Stations
+    const upsertedStations = await db
+      .insert(stations)
+      .values(chunk.map(s => ({
+        siteId: s.siteId,
+        brand: s.brand,
+        address: s.address,
+        postcode: s.postcode,
+        latitude: s.latitude,
+        longitude: s.longitude,
+        updatedAt: new Date().toISOString(),
+      })))
+      .onConflictDoUpdate({
+        target: stations.siteId,
+        set: {
+          brand: stations.brand,
+          address: stations.address,
+          postcode: stations.postcode,
+          latitude: stations.latitude,
+          longitude: stations.longitude,
           updatedAt: new Date().toISOString(),
-        })
-        .where(eq(stations.id, stationId));
-    } else {
-      const inserted = await db
-        .insert(stations)
-        .values({
-          siteId: station.siteId,
-          brand: station.brand,
-          address: station.address,
-          postcode: station.postcode,
-          latitude: station.latitude,
-          longitude: station.longitude,
-        })
-        .returning({ id: stations.id });
-      stationId = inserted[0]!.id;
+        },
+      })
+      .returning({ id: stations.id, siteId: stations.siteId });
+
+    upsertedCount += upsertedStations.length;
+
+    // 2. Fetch current prices for these stations to compare
+    const stationIds = upsertedStations.map(s => s.id);
+    const currentPrices = await db
+      .select({
+        stationId: prices.stationId,
+        fuelType: prices.fuelType,
+        pricePence: prices.pricePence,
+      })
+      .from(prices)
+      .where(inArray(prices.stationId, stationIds));
+
+    // Group current prices by stationId and fuelType for quick lookup
+    const currentPriceMap = new Map<string, number>();
+    for (const p of currentPrices) {
+      currentPriceMap.set(`${p.stationId}-${p.fuelType}`, p.pricePence);
     }
-    upserted++;
 
-    // Insert prices only if changed
-    for (const [fuelType, pricePence] of Object.entries(station.prices)) {
-      const latestPrice = await db
-        .select({ pricePence: prices.pricePence })
-        .from(prices)
-        .where(and(eq(prices.stationId, stationId), eq(prices.fuelType, fuelType)))
-        .orderBy(desc(prices.reportedAt))
-        .limit(1);
+    // 3. Prepare batch price inserts
+    const pricesToInsert = [];
+    const now = new Date().toISOString();
 
-      if (latestPrice.length === 0 || latestPrice[0]!.pricePence !== pricePence) {
-        await db.insert(prices).values({
-          stationId,
-          fuelType,
-          pricePence,
-          reportedAt: new Date().toISOString(),
-        });
-        pricesInserted++;
+    for (const s of upsertedStations) {
+      const originalStation = chunk.find(c => c.siteId === s.siteId);
+      if (!originalStation) continue;
+
+      for (const [fuelType, pricePence] of Object.entries(originalStation.prices)) {
+        const key = `${s.id}-${fuelType}`;
+        const currentPrice = currentPriceMap.get(key);
+
+        if (currentPrice === undefined || currentPrice !== pricePence) {
+          pricesToInsert.push({
+            stationId: s.id,
+            fuelType,
+            pricePence,
+            reportedAt: now,
+          });
+        }
       }
+    }
+
+    // 4. Batch insert prices
+    if (pricesToInsert.length > 0) {
+      await db.insert(prices).values(pricesToInsert);
+      pricesInsertedCount += pricesToInsert.length;
     }
   }
 
-  return { upserted, pricesInserted };
+  return { upserted: upsertedCount, pricesInserted: pricesInsertedCount };
 }
