@@ -15,9 +15,10 @@ Two tables:
 
 ## Data
 
-- ~4,000 stations ingested from 12 of 14 CMA feeds
+- ~4,079 stations ingested from 11 of 14 CMA feeds (as of 2026-04-03)
 - BP returns HTTP 403 (blocks requests), Karan Retail endpoint is down
-- Full ingestion takes ~52 minutes (one-by-one upserts over network)
+- Morrisons returns HTTP 404 (as of 2026-04-03 — was previously working, feed URL may have changed)
+- Full ingestion takes ~28 minutes
 - Don't re-run full ingestion casually — data is already there
 
 ## Conventions
