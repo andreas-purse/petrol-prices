@@ -400,6 +400,129 @@ function MapTileLayerWithRegistration({ name, ...props }: MapTileLayerProps) {
   return <OriginalMapTileLayer name={name} {...props} />;
 }
 
+/* ── LocateControl ─────────────────────────────────────────── */
+
+function MapLocateControl() {
+  const map = useMap();
+  const [locating, setLocating] = useState(false);
+
+  const handleLocate = useCallback(() => {
+    setLocating(true);
+    map.locate({ setView: true, maxZoom: 14 });
+
+    function onFound() {
+      setLocating(false);
+      map.off("locationfound", onFound);
+      map.off("locationerror", onError);
+    }
+    function onError() {
+      setLocating(false);
+      map.off("locationfound", onFound);
+      map.off("locationerror", onError);
+    }
+
+    map.on("locationfound", onFound);
+    map.on("locationerror", onError);
+  }, [map]);
+
+  return (
+    <div className="leaflet-top leaflet-left" style={{ marginTop: 80, marginLeft: 10 }}>
+      <div className="leaflet-control leaflet-bar">
+        <a
+          href="#"
+          role="button"
+          title="Find my location"
+          aria-label="Find my location"
+          onClick={(e) => {
+            e.preventDefault();
+            handleLocate();
+          }}
+          style={{ width: 30, height: 30, lineHeight: "30px", textAlign: "center", fontSize: 16 }}
+        >
+          {locating ? "…" : "◎"}
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ── SearchControl ─────────────────────────────────────────── */
+
+function MapSearchControl() {
+  const map = useMap();
+  const ref = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
+  const [open, setOpen] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    L.DomEvent.disableClickPropagation(el);
+    L.DomEvent.disableScrollPropagation(el);
+  }, []);
+
+  const search = useCallback((q: string) => {
+    if (q.length < 3) {
+      setResults([]);
+      return;
+    }
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5`)
+      .then((r) => r.json())
+      .then((data) => setResults(data))
+      .catch(() => setResults([]));
+  }, []);
+
+  const handleChange = useCallback(
+    (value: string) => {
+      setQuery(value);
+      setOpen(true);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => search(value), 400);
+    },
+    [search],
+  );
+
+  const handleSelect = useCallback(
+    (result: { lat: string; lon: string }) => {
+      map.flyTo([parseFloat(result.lat), parseFloat(result.lon)], 14);
+      setOpen(false);
+      setQuery("");
+      setResults([]);
+    },
+    [map],
+  );
+
+  return (
+    <div ref={ref} className="leaflet-top leaflet-left" style={{ marginTop: 10, marginLeft: 10 }}>
+      <div className="leaflet-control rounded-md border bg-white shadow-lg">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder="Search location…"
+          className="w-48 rounded-md border-none bg-transparent px-2 py-1.5 text-sm outline-none"
+        />
+        {open && results.length > 0 && (
+          <ul className="max-h-48 overflow-auto border-t text-sm">
+            {results.map((r, i) => (
+              <li key={i}>
+                <button
+                  className="w-full px-2 py-1.5 text-left hover:bg-muted"
+                  onClick={() => handleSelect(r)}
+                >
+                  {r.display_name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Exports ────────────────────────────────────────────────── */
 
 export {
@@ -410,6 +533,8 @@ export {
   MapPopup,
   MapZoomControl,
   MapFullscreenControl,
+  MapLocateControl,
+  MapSearchControl,
   MapControlContainer,
   MapLayers,
   MapLayersControl,
