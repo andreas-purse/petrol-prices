@@ -23,3 +23,12 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* shadcn-map custom marker icon — strip Leaflet default styles */
+.shadcn-map-icon {
+  background: none !important;
+  border: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
