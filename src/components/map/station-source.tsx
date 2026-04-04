@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { Source, Layer } from "react-map-gl/maplibre";
-import type { LayerProps, MapLayerMouseEvent } from "react-map-gl/maplibre";
+import { MapCircleMarker, MapPopup } from "@/components/ui/map";
 import type { StationGeoJSON, StationFeature } from "@/hooks/use-stations";
 import type { FuelType } from "@/hooks/use-fuel-filter";
-import { useMap } from "react-map-gl/maplibre";
+import { FUEL_LABELS } from "@/hooks/use-fuel-filter";
+import { FreshnessBadge, CmaBadge } from "@/components/ui/freshness-badge";
 
 function getPriceColor(price: number | undefined): string {
   if (!price) return "#94a3b8"; // gray for no price
@@ -16,79 +15,82 @@ function getPriceColor(price: number | undefined): string {
   return "#dc2626"; // red
 }
 
+function formatPrice(pence: number): string {
+  return `${pence.toFixed(1)}p`;
+}
+
 interface StationSourceProps {
   geojson: StationGeoJSON;
   fuel: FuelType;
-  onStationClick: (feature: StationFeature) => void;
 }
 
-export function StationSource({ geojson, fuel, onStationClick }: StationSourceProps) {
-  const { current: map } = useMap();
-
-  const coloredGeojson = {
-    ...geojson,
-    features: geojson.features.map((f) => ({
-      ...f,
-      properties: {
-        ...f.properties,
-        _color: getPriceColor(f.properties.prices[fuel]),
-        _price: -(f.properties.prices[fuel] ?? 9999),
-      },
-    })),
-  };
-
-  const pointLayer: LayerProps = {
-    id: "station-points",
-    type: "circle",
-    source: "stations",
-    layout: {
-      "circle-sort-key": ["get", "_price"],
-    },
-    paint: {
-      "circle-radius": 3.5,
-      "circle-color": ["get", "_color"],
-    },
-  };
-
-  const onClick = useCallback(
-    (event: MapLayerMouseEvent) => {
-      if (!map || !event.features?.length) return;
-
-      const feature = event.features[0]!;
-      const props = feature.properties;
-      if (props) {
-        const stationFeature: StationFeature = {
-          type: "Feature",
-          geometry: feature.geometry as StationFeature["geometry"],
-          properties: {
-            id: props.id,
-            siteId: props.siteId,
-            brand: props.brand,
-            address: props.address,
-            postcode: props.postcode,
-            prices: typeof props.prices === "string" ? JSON.parse(props.prices) : props.prices,
-            updatedAt: props.updatedAt,
-          },
-        };
-        onStationClick(stationFeature);
-      }
-    },
-    [map, onStationClick],
-  );
-
-  useEffect(() => {
-    if (!map) return;
-
-    map.on("click", "station-points", onClick);
-
-    return () => {
-      map.off("click", "station-points", onClick);
-    };
-  }, [map, onClick]);
+export function StationSource({ geojson, fuel }: StationSourceProps) {
+  // Sort so cheapest stations render on top (last in array = on top in SVG/canvas)
+  const sorted = [...geojson.features].sort((a, b) => {
+    const pa = a.properties.prices[fuel] ?? 9999;
+    const pb = b.properties.prices[fuel] ?? 9999;
+    return pb - pa; // expensive first, cheap last (on top)
+  });
 
   return (
-    <Source id="stations" type="geojson" data={coloredGeojson}>
-      <Layer {...pointLayer} />
-    </Source>
+    <>
+      {sorted.map((f) => {
+        const price = f.properties.prices[fuel];
+        const color = getPriceColor(price);
+        const [lng, lat] = f.geometry.coordinates;
+
+        return (
+          <MapCircleMarker
+            key={f.properties.id}
+            center={[lat!, lng!]}
+            radius={4}
+            pathOptions={{
+              fillColor: color,
+              fillOpacity: 1,
+              stroke: false,
+            }}
+          >
+            <MapPopup>
+              <StationPopupContent station={f} />
+            </MapPopup>
+          </MapCircleMarker>
+        );
+      })}
+    </>
+  );
+}
+
+function StationPopupContent({ station }: { station: StationFeature }) {
+  const { properties } = station;
+
+  return (
+    <div className="min-w-[200px]">
+      <h3 className="text-sm font-bold text-foreground">{properties.brand}</h3>
+      <p className="text-xs text-muted-foreground">{properties.address}</p>
+      {properties.postcode && (
+        <p className="text-xs text-muted-foreground">{properties.postcode}</p>
+      )}
+      <div className="mt-1.5 flex items-center gap-2">
+        <CmaBadge />
+        {properties.updatedAt && (
+          <FreshnessBadge updatedAt={properties.updatedAt} />
+        )}
+      </div>
+      <div className="mt-2 space-y-1">
+        {(Object.entries(properties.prices) as [FuelType, number][]).map(
+          ([fuelType, price]) => (
+            <div key={fuelType} className="flex justify-between text-sm">
+              <span className="text-muted-foreground">
+                {FUEL_LABELS[fuelType] ?? fuelType}
+              </span>
+              <span className="font-semibold">{formatPrice(price)}</span>
+            </div>
+          ),
+        )}
+        {Object.keys(properties.prices).length === 0 && (
+          <p className="text-xs text-muted-foreground">No price data available</p>
+        )}
+      </div>
+    </div>
   );
 }

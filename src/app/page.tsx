@@ -10,7 +10,7 @@ import { useSearch } from "@/hooks/use-search";
 import { useNearby } from "@/hooks/use-nearby";
 import { useFuelFilter } from "@/hooks/use-fuel-filter";
 
-// Dynamically import map to avoid SSR issues with MapLibre
+// Dynamically import map to avoid SSR issues with Leaflet
 const StationMap = dynamic(
   () => import("@/components/map/station-map").then((mod) => ({ default: mod.StationMap })),
   {

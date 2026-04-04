@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import Map, { NavigationControl, GeolocateControl } from "react-map-gl/maplibre";
-import type { MapRef } from "react-map-gl/maplibre";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { useRef } from "react";
+import { Map, MapTileLayer, MapZoomControl, useMap } from "@/components/ui/map";
 import { StationSource } from "./station-source";
-import { StationPopup } from "./station-popup";
-import { useStations, type StationFeature } from "@/hooks/use-stations";
+import { useStations } from "@/hooks/use-stations";
 import type { FuelType } from "@/hooks/use-fuel-filter";
+import type { LatLngExpression } from "leaflet";
 
-const MAP_STYLE =
-  process.env.NEXT_PUBLIC_MAP_STYLE_URL || "https://tiles.openfreemap.org/styles/liberty";
-
-const UK_CENTER = { latitude: 54.5, longitude: -2.5 };
+const UK_CENTER: LatLngExpression = [54.5, -2.5];
 const INITIAL_ZOOM = 6;
 
 interface StationMapProps {
@@ -21,66 +16,47 @@ interface StationMapProps {
   searchLng?: number | null;
 }
 
-export function StationMap({ fuel, searchLat, searchLng }: StationMapProps) {
-  const mapRef = useRef<MapRef>(null);
-  const { stations, isLoading } = useStations();
-  const [selectedStation, setSelectedStation] = useState<StationFeature | null>(null);
+/** Imperatively fly to a location when searchLat/searchLng change */
+function FlyTo({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap();
+  const prevKey = useRef("");
+  const key = `${lat},${lng}`;
 
-  const onStationClick = useCallback((feature: StationFeature) => {
-    setSelectedStation(feature);
-  }, []);
-
-  const onPopupClose = useCallback(() => {
-    setSelectedStation(null);
-  }, []);
-
-  // Fly to search result
-  const prevSearch = useRef<string>("");
-  const searchKey = `${searchLat},${searchLng}`;
-  if (searchKey !== prevSearch.current && searchLat && searchLng) {
-    prevSearch.current = searchKey;
-    mapRef.current?.flyTo({
-      center: [searchLng, searchLat],
-      zoom: 13,
-      duration: 1500,
-    });
+  if (key !== prevKey.current) {
+    prevKey.current = key;
+    map.flyTo([lat, lng], 13, { duration: 1.5 });
   }
+
+  return null;
+}
+
+export function StationMap({ fuel, searchLat, searchLng }: StationMapProps) {
+  const { stations, isLoading } = useStations();
 
   return (
     <div className="relative h-full w-full">
       {isLoading && (
-        <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2 rounded-lg bg-white px-4 py-2 shadow-lg">
+        <div className="absolute top-4 left-1/2 z-[1000] -translate-x-1/2 rounded-lg bg-white px-4 py-2 shadow-lg">
           <p className="text-sm text-muted-foreground">Loading stations...</p>
         </div>
       )}
       <Map
-        ref={mapRef}
-        initialViewState={{
-          ...UK_CENTER,
-          zoom: INITIAL_ZOOM,
-        }}
-        style={{ width: "100%", height: "100%" }}
-        mapStyle={MAP_STYLE}
-        maxBounds={[-12, 48, 4, 62]}
+        center={UK_CENTER}
+        zoom={INITIAL_ZOOM}
+        zoomControl={false}
+        maxBounds={[
+          [48, -12],
+          [62, 4],
+        ]}
       >
-        <NavigationControl position="top-right" />
-        <GeolocateControl
-          position="top-right"
-          trackUserLocation
-          showAccuracyCircle={false}
-        />
+        <MapTileLayer />
+        <MapZoomControl />
 
-        {stations && (
-          <StationSource
-            geojson={stations}
-            fuel={fuel}
-            onStationClick={onStationClick}
-          />
+        {searchLat && searchLng && (
+          <FlyTo lat={searchLat} lng={searchLng} />
         )}
 
-        {selectedStation && (
-          <StationPopup station={selectedStation} onClose={onPopupClose} />
-        )}
+        {stations && <StationSource geojson={stations} fuel={fuel} />}
       </Map>
     </div>
   );

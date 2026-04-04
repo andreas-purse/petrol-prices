@@ -9,7 +9,7 @@ test.describe("Visual snapshots", () => {
     await page.goto("/");
     // Wait for the map to fully render
     await page
-      .waitForSelector(".maplibregl-canvas", { timeout: 15_000 })
+      .waitForSelector(".leaflet-container", { timeout: 15_000 })
       .catch(() => {});
     // Wait for station data to load (Loading stations... disappears)
     await page
