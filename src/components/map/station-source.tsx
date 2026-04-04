@@ -16,43 +16,6 @@ function getPriceColor(price: number | undefined): string {
   return "#dc2626"; // red
 }
 
-const clusterLayer: LayerProps = {
-  id: "clusters",
-  type: "circle",
-  source: "stations",
-  filter: ["has", "point_count"],
-  paint: {
-    "circle-color": [
-      "step",
-      ["get", "point_count"],
-      "#60a5fa",
-      50,
-      "#3b82f6",
-      200,
-      "#2563eb",
-      500,
-      "#1d4ed8",
-    ],
-    "circle-radius": ["step", ["get", "point_count"], 18, 50, 24, 200, 30, 500, 36],
-    "circle-stroke-width": 2,
-    "circle-stroke-color": "#ffffff",
-  },
-};
-
-const clusterCountLayer: LayerProps = {
-  id: "cluster-count",
-  type: "symbol",
-  source: "stations",
-  filter: ["has", "point_count"],
-  layout: {
-    "text-field": "{point_count_abbreviated}",
-    "text-size": 13,
-  },
-  paint: {
-    "text-color": "#ffffff",
-  },
-};
-
 interface StationSourceProps {
   geojson: StationGeoJSON;
   fuel: FuelType;
@@ -62,7 +25,6 @@ interface StationSourceProps {
 export function StationSource({ geojson, fuel, onStationClick }: StationSourceProps) {
   const { current: map } = useMap();
 
-  // Color unclustered points by price
   const coloredGeojson = {
     ...geojson,
     features: geojson.features.map((f) => ({
@@ -74,11 +36,10 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     })),
   };
 
-  const dynamicPointLayer: LayerProps = {
-    id: "unclustered-point",
+  const pointLayer: LayerProps = {
+    id: "station-points",
     type: "circle",
     source: "stations",
-    filter: ["!", ["has", "point_count"]],
     paint: {
       "circle-radius": 7,
       "circle-stroke-width": 2,
@@ -92,24 +53,6 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       if (!map || !event.features?.length) return;
 
       const feature = event.features[0]!;
-
-      if (feature.properties?.cluster) {
-        const clusterId = feature.properties.cluster_id;
-        const source = map.getSource("stations");
-        if (source && "getClusterExpansionZoom" in source) {
-          (source as { getClusterExpansionZoom: (id: number) => Promise<number> })
-            .getClusterExpansionZoom(clusterId)
-            .then((zoom) => {
-              const coords = (feature.geometry as GeoJSON.Point).coordinates;
-              map.easeTo({
-                center: [coords[0]!, coords[1]!],
-                zoom,
-              });
-            });
-        }
-        return;
-      }
-
       const props = feature.properties;
       if (props) {
         const stationFeature: StationFeature = {
@@ -131,31 +74,19 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     [map, onStationClick],
   );
 
-  // Register click handlers properly with cleanup
   useEffect(() => {
     if (!map) return;
 
-    map.on("click", "clusters", onClick);
-    map.on("click", "unclustered-point", onClick);
+    map.on("click", "station-points", onClick);
 
     return () => {
-      map.off("click", "clusters", onClick);
-      map.off("click", "unclustered-point", onClick);
+      map.off("click", "station-points", onClick);
     };
   }, [map, onClick]);
 
   return (
-    <Source
-      id="stations"
-      type="geojson"
-      data={coloredGeojson}
-      cluster
-      clusterMaxZoom={14}
-      clusterRadius={50}
-    >
-      <Layer {...clusterLayer} />
-      <Layer {...clusterCountLayer} />
-      <Layer {...dynamicPointLayer} />
+    <Source id="stations" type="geojson" data={coloredGeojson}>
+      <Layer {...pointLayer} />
     </Source>
   );
 }
