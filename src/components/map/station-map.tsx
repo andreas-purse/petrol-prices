@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Map, MapTileLayer, MapZoomControl, useMap } from "@/components/ui/map";
+import { Map, MapTileLayer, MapZoomControl, MapFullscreenControl, MapLocateControl, MapSearchControl, useMap } from "@/components/ui/map";
 import { StationSource } from "./station-source";
 import { useStations } from "@/hooks/use-stations";
 import type { FuelType } from "@/hooks/use-fuel-filter";
@@ -51,6 +51,9 @@ export function StationMap({ fuel, searchLat, searchLng }: StationMapProps) {
       >
         <MapTileLayer />
         <MapZoomControl />
+        <MapFullscreenControl />
+        <MapLocateControl />
+        <MapSearchControl />
 
         {searchLat && searchLng && (
           <FlyTo lat={searchLat} lng={searchLng} />
