@@ -41,9 +41,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     type: "circle",
     source: "stations",
     paint: {
-      "circle-radius": 7,
-      "circle-stroke-width": 2,
-      "circle-stroke-color": "#ffffff",
+      "circle-radius": 3.5,
       "circle-color": ["get", "_color"],
     },
   };
