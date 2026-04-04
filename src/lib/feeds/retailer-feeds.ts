@@ -30,7 +30,7 @@ export const RETAILER_FEEDS: RetailerFeed[] = [
   },
   {
     name: "Morrisons",
-    url: "https://morrisons.com/fuel-prices/fuel.json",
+    url: "https://www.morrisons.com/fuel-prices/fuel.json",
   },
   {
     name: "Moto",
