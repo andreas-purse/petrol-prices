@@ -43,17 +43,16 @@ export function StationMap({ fuel, searchLat, searchLng }: StationMapProps) {
       <Map
         center={UK_CENTER}
         zoom={INITIAL_ZOOM}
-        zoomControl={false}
         maxBounds={[
           [48, -12],
           [62, 4],
         ]}
       >
         <MapTileLayer />
-        <MapZoomControl />
-        <MapFullscreenControl />
-        <MapLocateControl />
-        <MapSearchControl />
+        <MapZoomControl position="top-1 left-1" />
+        <MapFullscreenControl position="top-1 right-1" />
+        <MapLocateControl position="bottom-1 right-1" />
+        <MapSearchControl position="top-12 left-1" bbox={[-8, 49, 2, 61]} lang="en" placeholder="Search UK..." />
 
         {searchLat && searchLng && (
           <FlyTo lat={searchLat} lng={searchLng} />
