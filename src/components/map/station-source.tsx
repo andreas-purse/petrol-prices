@@ -32,6 +32,7 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
       properties: {
         ...f.properties,
         _color: getPriceColor(f.properties.prices[fuel]),
+        _price: -(f.properties.prices[fuel] ?? 9999),
       },
     })),
   };
@@ -40,6 +41,9 @@ export function StationSource({ geojson, fuel, onStationClick }: StationSourcePr
     id: "station-points",
     type: "circle",
     source: "stations",
+    layout: {
+      "circle-sort-key": ["get", "_price"],
+    },
     paint: {
       "circle-radius": 3.5,
       "circle-color": ["get", "_color"],
