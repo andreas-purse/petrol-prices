@@ -29,6 +29,6 @@ globs: *
 ## Deployment
 
 - Vercel auto-deploys from `main` branch
-- Daily cron at 6 AM UTC hits `/api/ingest` to refresh prices
+- Nightly ingestion via GitHub Actions at midnight UK time (`.github/workflows/nightly-ingest.yml`)
 - Turso DB: libsql://petrol-prices-andreas-purse.aws-eu-west-1.turso.io
 - Env vars on Vercel: TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, INGEST_API_KEY, NEXT_PUBLIC_MAP_STYLE_URL, CRON_SECRET
